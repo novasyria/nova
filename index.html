@@ -1,0 +1,3171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>NOVA | التجارة عليك، والمتجر علينا</title>
+
+<meta name="description"
+content="NOVA — أنشئ متجرك الإلكتروني بكل سهولة. التجارة عليك، والمتجر علينا.">
+
+<style>
+
+/* =====================================================
+   RESET
+===================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:
+    Arial,
+    "Tajawal",
+    "Cairo",
+    sans-serif;
+
+    background:#fafafa;
+    color:#111;
+
+    overflow-x:hidden;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+button{
+    font-family:inherit;
+}
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+:root{
+
+    --black:#101010;
+    --black2:#181818;
+
+    --gold:#d7a62a;
+    --gold2:#edc65a;
+
+    --white:#fff;
+
+    --gray:#707070;
+    --light:#f5f5f5;
+
+    --border:#e9e9e9;
+
+    --radius:24px;
+
+}
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+.navbar{
+
+    position:fixed;
+
+    top:0;
+    right:0;
+
+    width:100%;
+
+    z-index:9999;
+
+    padding:16px 5%;
+
+    background:
+    rgba(250,250,250,.82);
+
+    backdrop-filter:
+    blur(20px);
+
+    border-bottom:
+    1px solid rgba(0,0,0,.05);
+
+}
+
+.nav-container{
+
+    max-width:1250px;
+
+    margin:auto;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+}
+
+.logo{
+
+    font-size:30px;
+
+    font-weight:900;
+
+    letter-spacing:-2px;
+
+}
+
+.logo span{
+    color:var(--gold);
+}
+
+
+.nav-links{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:30px;
+
+}
+
+.nav-links a{
+
+    font-size:14px;
+
+    color:#555;
+
+    transition:.2s;
+
+}
+
+.nav-links a:hover{
+    color:#000;
+}
+
+
+.nav-buttons{
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+
+.btn{
+
+    border:0;
+
+    cursor:pointer;
+
+    border-radius:14px;
+
+    padding:12px 21px;
+
+    font-size:14px;
+
+    font-weight:700;
+
+    transition:.25s;
+
+    display:inline-flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+
+.btn-black{
+
+    background:#111;
+
+    color:#fff;
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.12);
+
+}
+
+.btn-black:hover{
+
+    transform:
+    translateY(-2px);
+
+    box-shadow:
+    0 15px 35px rgba(0,0,0,.18);
+
+}
+
+
+.btn-white{
+
+    background:#fff;
+
+    border:
+    1px solid #ddd;
+
+}
+
+.btn-white:hover{
+
+    border-color:#aaa;
+
+}
+
+
+/* =====================================================
+   MOBILE MENU
+===================================================== */
+
+.menu-button{
+
+    display:none;
+
+    width:44px;
+    height:44px;
+
+    border-radius:13px;
+
+    border:1px solid #ddd;
+
+    background:#fff;
+
+    cursor:pointer;
+
+    font-size:22px;
+
+}
+
+
+.mobile-menu{
+
+    position:fixed;
+
+    top:78px;
+
+    right:5%;
+
+    left:5%;
+
+    background:#fff;
+
+    border:1px solid #eee;
+
+    border-radius:20px;
+
+    padding:12px;
+
+    box-shadow:
+    0 20px 60px rgba(0,0,0,.12);
+
+    display:none;
+
+    z-index:9998;
+
+}
+
+
+.mobile-menu.active{
+    display:block;
+}
+
+
+.mobile-menu a{
+
+    display:block;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    color:#444;
+
+    font-size:15px;
+
+}
+
+
+.mobile-menu a:hover{
+    background:#f6f6f6;
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero{
+
+    min-height:100vh;
+
+    padding:
+    150px 5% 80px;
+
+    position:relative;
+
+    display:flex;
+
+    align-items:center;
+
+    overflow:hidden;
+
+}
+
+
+/* background glow */
+
+.hero::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:500px;
+    height:500px;
+
+    border-radius:50%;
+
+    background:
+    rgba(215,166,42,.12);
+
+    filter:blur(100px);
+
+    top:80px;
+    left:-200px;
+
+    pointer-events:none;
+
+}
+
+
+.hero-container{
+
+    width:100%;
+
+    max-width:1250px;
+
+    margin:auto;
+
+    display:grid;
+
+    grid-template-columns:
+    1fr 1fr;
+
+    align-items:center;
+
+    gap:80px;
+
+}
+
+
+.hero-content{
+    max-width:620px;
+}
+
+
+.hero-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:
+    9px 15px;
+
+    background:#fff;
+
+    border:
+    1px solid #e9e9e9;
+
+    border-radius:50px;
+
+    font-size:13px;
+
+    color:#555;
+
+    margin-bottom:25px;
+
+    box-shadow:
+    0 8px 25px rgba(0,0,0,.04);
+
+}
+
+
+.hero-badge-dot{
+
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
+
+    background:var(--gold);
+
+}
+
+
+.hero h1{
+
+    font-size:
+    clamp(45px,6vw,76px);
+
+    line-height:1.08;
+
+    letter-spacing:-3px;
+
+    margin-bottom:25px;
+
+}
+
+
+.hero h1 .gold{
+    color:var(--gold);
+}
+
+
+.hero-subtitle{
+
+    font-size:21px;
+
+    font-weight:700;
+
+    margin-bottom:12px;
+
+}
+
+
+.hero-description{
+
+    color:#777;
+
+    font-size:17px;
+
+    line-height:2;
+
+    max-width:540px;
+
+    margin-bottom:30px;
+
+}
+
+
+.hero-buttons{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+
+}
+
+
+.hero-main-btn{
+
+    padding:
+    16px 26px;
+
+    font-size:15px;
+
+}
+
+
+.hero-small{
+
+    margin-top:17px;
+
+    color:#999;
+
+    font-size:12px;
+
+}
+
+
+/* =====================================================
+   HERO STORE MOCKUP
+===================================================== */
+
+.mockup{
+
+    position:relative;
+
+}
+
+
+.mockup-card{
+
+    background:#fff;
+
+    border:
+    1px solid #e8e8e8;
+
+    border-radius:30px;
+
+    padding:12px;
+
+    box-shadow:
+    0 35px 100px rgba(0,0,0,.12);
+
+    transform:
+    rotate(1deg);
+
+}
+
+
+.mockup-top{
+
+    height:38px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:0 10px;
+
+}
+
+
+.dot{
+
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
+
+    background:#ddd;
+
+}
+
+
+.store{
+
+    background:#f8f8f8;
+
+    border-radius:22px;
+
+    overflow:hidden;
+
+}
+
+
+.store-header{
+
+    height:62px;
+
+    background:#fff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 20px;
+
+}
+
+
+.store-logo{
+
+    font-size:24px;
+
+    font-weight:900;
+
+}
+
+
+.store-logo span{
+    color:var(--gold);
+}
+
+
+.store-icons{
+
+    display:flex;
+
+    gap:8px;
+
+}
+
+
+.store-icon{
+
+    width:35px;
+    height:35px;
+
+    border-radius:50%;
+
+    background:#f5f5f5;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+
+.store-banner{
+
+    margin:12px;
+
+    height:200px;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    position:relative;
+
+    color:#fff;
+
+    padding:30px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    background:
+
+    linear-gradient(
+        90deg,
+        rgba(0,0,0,.78),
+        rgba(0,0,0,.2)
+    ),
+
+    url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80");
+
+    background-size:cover;
+
+    background-position:center;
+
+}
+
+
+.store-banner small{
+
+    opacity:.8;
+
+    margin-bottom:7px;
+
+}
+
+
+.store-banner h3{
+
+    font-size:31px;
+
+    margin-bottom:15px;
+
+}
+
+
+.shop-btn{
+
+    width:max-content;
+
+    background:#fff;
+
+    color:#111;
+
+    border-radius:10px;
+
+    padding:10px 17px;
+
+    font-size:12px;
+
+}
+
+
+.store-section-title{
+
+    padding:
+    10px 20px 15px;
+
+    font-size:21px;
+
+    font-weight:800;
+
+}
+
+
+.products{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(3,1fr);
+
+    gap:9px;
+
+    padding:
+    0 12px 18px;
+
+}
+
+
+.product{
+
+    background:#fff;
+
+    border-radius:15px;
+
+    overflow:hidden;
+
+}
+
+
+.product-img{
+
+    height:110px;
+
+    background-size:cover;
+
+    background-position:center;
+
+}
+
+
+.product:nth-child(1)
+.product-img{
+
+    background-image:
+    url("https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80");
+
+}
+
+
+.product:nth-child(1) .product-img{
+
+    background-image:
+    url("https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80");
+
+}
+
+
+.product:nth-child(2) .product-img{
+
+    background-image:
+    url("https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80");
+
+}
+
+
+.product:nth-child(3) .product-img{
+
+    background-image:
+    url("https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80");
+
+}
+
+
+.product-info{
+    padding:9px;
+}
+
+
+.product-info small{
+    color:#999;
+}
+
+
+.product-info b{
+    display:block;
+    margin-top:4px;
+}
+
+
+/* =====================================================
+   FLOATING CARD
+===================================================== */
+
+.floating-card{
+
+    position:absolute;
+
+    bottom:-25px;
+
+    left:-35px;
+
+    background:#111;
+
+    color:#fff;
+
+    padding:
+    18px 22px;
+
+    border-radius:18px;
+
+    box-shadow:
+    0 20px 50px rgba(0,0,0,.25);
+
+}
+
+
+.floating-card small{
+
+    display:block;
+
+    color:#aaa;
+
+    margin-bottom:5px;
+
+}
+
+
+.floating-card strong{
+
+    font-size:23px;
+
+}
+
+
+/* =====================================================
+   SECTION
+===================================================== */
+
+.section{
+
+    padding:
+    110px 5%;
+
+}
+
+
+.section-container{
+
+    max-width:1200px;
+
+    margin:auto;
+
+}
+
+
+.section-heading{
+
+    max-width:700px;
+
+    margin:
+    0 auto 60px;
+
+    text-align:center;
+
+}
+
+
+.section-heading .mini{
+
+    color:var(--gold);
+
+    font-size:13px;
+
+    font-weight:800;
+
+    margin-bottom:12px;
+
+}
+
+
+.section-heading h2{
+
+    font-size:
+    clamp(34px,4vw,50px);
+
+    line-height:1.2;
+
+    margin-bottom:15px;
+
+    letter-spacing:-1.5px;
+
+}
+
+
+.section-heading p{
+
+    color:#777;
+
+    line-height:1.9;
+
+}
+
+
+/* =====================================================
+   FEATURES
+===================================================== */
+
+.features{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(4,1fr);
+
+    gap:16px;
+
+}
+
+
+.feature{
+
+    background:#fff;
+
+    border:
+    1px solid var(--border);
+
+    border-radius:24px;
+
+    padding:30px 24px;
+
+    transition:.3s;
+
+}
+
+
+.feature:hover{
+
+    transform:
+    translateY(-7px);
+
+    box-shadow:
+    0 25px 60px rgba(0,0,0,.08);
+
+}
+
+
+.feature-icon{
+
+    width:50px;
+    height:50px;
+
+    border-radius:16px;
+
+    background:#faf2d9;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:23px;
+
+    margin-bottom:20px;
+
+}
+
+
+.feature h3{
+
+    font-size:18px;
+
+    margin-bottom:10px;
+
+}
+
+
+.feature p{
+
+    color:#777;
+
+    line-height:1.8;
+
+    font-size:14px;
+
+}
+
+
+/* =====================================================
+   HOW IT WORKS
+===================================================== */
+
+.steps{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(3,1fr);
+
+    gap:20px;
+
+}
+
+
+.step{
+
+    background:#fff;
+
+    border:
+    1px solid var(--border);
+
+    border-radius:25px;
+
+    padding:32px;
+
+}
+
+
+.step-number{
+
+    font-size:55px;
+
+    font-weight:900;
+
+    color:#eee4c6;
+
+    margin-bottom:15px;
+
+}
+
+
+.step h3{
+
+    font-size:21px;
+
+    margin-bottom:10px;
+
+}
+
+
+.step p{
+
+    color:#777;
+
+    line-height:1.8;
+
+}
+
+
+/* =====================================================
+   SHOWCASE
+===================================================== */
+
+.showcase-wrapper{
+
+    background:#111;
+
+    border-radius:38px;
+
+    padding:75px;
+
+    color:#fff;
+
+    display:grid;
+
+    grid-template-columns:
+    .8fr 1.2fr;
+
+    gap:60px;
+
+    align-items:center;
+
+}
+
+
+.showcase-text .mini{
+
+    color:var(--gold2);
+
+    font-weight:800;
+
+    margin-bottom:15px;
+
+}
+
+
+.showcase-text h2{
+
+    font-size:46px;
+
+    line-height:1.25;
+
+    margin-bottom:20px;
+
+}
+
+
+.showcase-text p{
+
+    color:#aaa;
+
+    line-height:1.9;
+
+    margin-bottom:25px;
+
+}
+
+
+.checks{
+
+    list-style:none;
+
+}
+
+
+.checks li{
+
+    color:#ddd;
+
+    margin-bottom:14px;
+
+}
+
+
+.checks li::before{
+
+    content:"✓";
+
+    color:var(--gold2);
+
+    font-weight:bold;
+
+    margin-left:10px;
+
+}
+
+
+/* dashboard */
+
+.dashboard{
+
+    background:#fff;
+
+    color:#111;
+
+    border-radius:22px;
+
+    padding:15px;
+
+}
+
+
+.dashboard-head{
+
+    height:35px;
+
+    border-bottom:
+    1px solid #eee;
+
+    margin-bottom:15px;
+
+}
+
+
+.dashboard-content{
+
+    display:grid;
+
+    grid-template-columns:
+    150px 1fr;
+
+    gap:12px;
+
+}
+
+
+.dashboard-side{
+
+    background:#f7f7f7;
+
+    border-radius:15px;
+
+    padding:15px;
+
+}
+
+
+.line{
+
+    height:9px;
+
+    background:#ddd;
+
+    border-radius:20px;
+
+    margin-bottom:15px;
+
+}
+
+
+.dashboard-main{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(2,1fr);
+
+    gap:12px;
+
+}
+
+
+.stat{
+
+    background:#f7f7f7;
+
+    border-radius:15px;
+
+    padding:18px;
+
+    min-height:110px;
+
+}
+
+
+.stat small{
+
+    color:#888;
+
+}
+
+
+.stat strong{
+
+    display:block;
+
+    font-size:27px;
+
+    margin-top:10px;
+
+}
+
+
+/* =====================================================
+   PRICING
+===================================================== */
+
+.pricing-section{
+
+    background:#f5f5f5;
+
+}
+
+
+.pricing{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(2,1fr);
+
+    gap:20px;
+
+    max-width:850px;
+
+    margin:auto;
+
+}
+
+
+.price-card{
+
+    background:#fff;
+
+    border:
+    1px solid #e5e5e5;
+
+    border-radius:28px;
+
+    padding:35px;
+
+    position:relative;
+
+    transition:.3s;
+
+}
+
+
+.price-card:hover{
+
+    transform:
+    translateY(-5px);
+
+    box-shadow:
+    0 25px 60px rgba(0,0,0,.08);
+
+}
+
+
+.price-card.featured{
+
+    border:
+    2px solid var(--gold);
+
+    box-shadow:
+    0 20px 60px rgba(215,166,42,.12);
+
+}
+
+
+.popular{
+
+    position:absolute;
+
+    top:20px;
+
+    left:20px;
+
+    background:var(--gold);
+
+    color:#111;
+
+    padding:
+    7px 12px;
+
+    border-radius:30px;
+
+    font-size:11px;
+
+    font-weight:800;
+
+}
+
+
+.price-name{
+
+    color:#888;
+
+    font-size:14px;
+
+    margin-bottom:10px;
+
+}
+
+
+.price-title{
+
+    font-size:27px;
+
+    margin-bottom:15px;
+
+}
+
+
+.price{
+
+    display:flex;
+
+    align-items:end;
+
+    gap:5px;
+
+    margin-bottom:5px;
+
+}
+
+
+.price strong{
+
+    font-size:45px;
+
+}
+
+
+.price span{
+
+    color:#888;
+
+    margin-bottom:8px;
+
+}
+
+
+.price-description{
+
+    color:#777;
+
+    line-height:1.7;
+
+    font-size:13px;
+
+    margin-bottom:25px;
+
+}
+
+
+.saving{
+
+    display:inline-block;
+
+    background:#f8f0d8;
+
+    color:#9a7210;
+
+    padding:
+    6px 10px;
+
+    border-radius:8px;
+
+    font-size:11px;
+
+    font-weight:bold;
+
+    margin-bottom:20px;
+
+}
+
+
+.price-list{
+
+    list-style:none;
+
+    margin:
+    10px 0 28px;
+
+}
+
+
+.price-list li{
+
+    padding:
+    10px 0;
+
+    border-bottom:
+    1px solid #eee;
+
+    color:#555;
+
+    font-size:14px;
+
+}
+
+
+.price-list li::before{
+
+    content:"✓";
+
+    color:var(--gold);
+
+    font-weight:bold;
+
+    margin-left:8px;
+
+}
+
+
+.price-btn{
+
+    width:100%;
+
+    padding:15px;
+
+}
+
+
+/* =====================================================
+   FAQ
+===================================================== */
+
+.faq{
+
+    max-width:850px;
+
+    margin:auto;
+
+}
+
+
+details{
+
+    background:#fff;
+
+    border:
+    1px solid #e8e8e8;
+
+    border-radius:17px;
+
+    padding:20px;
+
+    margin-bottom:10px;
+
+    transition:.2s;
+
+}
+
+
+details[open]{
+
+    box-shadow:
+    0 12px 35px rgba(0,0,0,.05);
+
+}
+
+
+summary{
+
+    cursor:pointer;
+
+    font-weight:700;
+
+    font-size:15px;
+
+}
+
+
+details p{
+
+    color:#777;
+
+    line-height:1.9;
+
+    font-size:14px;
+
+    margin-top:15px;
+
+}
+
+
+/* =====================================================
+   CTA
+===================================================== */
+
+.final{
+
+    padding:
+    110px 5%;
+
+}
+
+
+.final-box{
+
+    max-width:1050px;
+
+    margin:auto;
+
+    border-radius:38px;
+
+    padding:
+    90px 30px;
+
+    text-align:center;
+
+    background:
+
+    radial-gradient(
+        circle at 10% 10%,
+        rgba(215,166,42,.28),
+        transparent 35%
+    ),
+
+    radial-gradient(
+        circle at 90% 90%,
+        rgba(215,166,42,.12),
+        transparent 35%
+    ),
+
+    #111;
+
+    color:#fff;
+
+}
+
+
+.final-box h2{
+
+    font-size:
+    clamp(35px,5vw,58px);
+
+    line-height:1.2;
+
+    margin-bottom:18px;
+
+}
+
+
+.final-box h2 span{
+
+    color:var(--gold2);
+
+}
+
+
+.final-box p{
+
+    color:#aaa;
+
+    margin-bottom:30px;
+
+}
+
+
+.final-box .btn{
+
+    background:#fff;
+
+    color:#111;
+
+}
+
+
+.final-box .btn:hover{
+
+    transform:
+    translateY(-3px);
+
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer{
+
+    border-top:
+    1px solid #eee;
+
+    padding:
+    35px 5%;
+
+}
+
+
+.footer-container{
+
+    max-width:1200px;
+
+    margin:auto;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+}
+
+
+.footer-logo{
+
+    font-size:23px;
+
+    font-weight:900;
+
+}
+
+
+.footer-logo span{
+
+    color:var(--gold);
+
+}
+
+
+.footer-copy{
+
+    color:#999;
+
+    font-size:12px;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:1000px){
+
+    .nav-links{
+        display:none;
+    }
+
+    .menu-button{
+        display:block;
+    }
+
+    .nav-buttons .btn-white{
+        display:none;
+    }
+
+
+    .hero-container{
+
+        grid-template-columns:1fr;
+
+        text-align:center;
+
+        gap:60px;
+
+    }
+
+
+    .hero-content{
+
+        margin:auto;
+
+    }
+
+
+    .hero-description{
+
+        margin-left:auto;
+        margin-right:auto;
+
+    }
+
+
+    .hero-buttons{
+
+        justify-content:center;
+
+    }
+
+
+    .mockup{
+
+        max-width:650px;
+
+        margin:auto;
+
+    }
+
+
+    .features{
+
+        grid-template-columns:
+        repeat(2,1fr);
+
+    }
+
+
+    .showcase-wrapper{
+
+        grid-template-columns:1fr;
+
+        padding:50px 30px;
+
+    }
+
+
+    .showcase-text{
+
+        text-align:center;
+
+    }
+
+
+    .checks{
+
+        text-align:right;
+
+    }
+
+}
+
+
+@media(max-width:650px){
+
+    .navbar{
+
+        padding:
+        13px 5%;
+
+    }
+
+
+    .logo{
+
+        font-size:26px;
+
+    }
+
+
+    .nav-buttons .btn-black{
+
+        padding:
+        10px 14px;
+
+        font-size:12px;
+
+    }
+
+
+    .hero{
+
+        padding:
+        125px 5% 65px;
+
+    }
+
+
+    .hero h1{
+
+        font-size:43px;
+
+        letter-spacing:-1.8px;
+
+    }
+
+
+    .hero-subtitle{
+
+        font-size:18px;
+
+    }
+
+
+    .hero-description{
+
+        font-size:15px;
+
+        line-height:1.9;
+
+    }
+
+
+    .hero-main-btn{
+
+        width:100%;
+
+    }
+
+
+    .mockup-card{
+
+        border-radius:22px;
+
+    }
+
+
+    .store-banner{
+
+        height:150px;
+
+        padding:20px;
+
+    }
+
+
+    .store-banner h3{
+
+        font-size:22px;
+
+    }
+
+
+    .product-img{
+
+        height:80px;
+
+    }
+
+
+    .floating-card{
+
+        left:5px;
+
+        bottom:-20px;
+
+        padding:
+        13px 16px;
+
+    }
+
+
+    .floating-card strong{
+
+        font-size:18px;
+
+    }
+
+
+    .section{
+
+        padding:
+        80px 5%;
+
+    }
+
+
+    .section-heading{
+
+        margin-bottom:40px;
+
+    }
+
+
+    .section-heading h2{
+
+        font-size:34px;
+
+    }
+
+
+    .features{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .steps{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .showcase-wrapper{
+
+        border-radius:25px;
+
+        padding:40px 20px;
+
+    }
+
+
+    .showcase-text h2{
+
+        font-size:34px;
+
+    }
+
+
+    .dashboard-content{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .dashboard-side{
+
+        display:none;
+
+    }
+
+
+    .pricing{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .price-card{
+
+        padding:28px;
+
+    }
+
+
+    .final{
+
+        padding:
+        70px 5%;
+
+    }
+
+
+    .final-box{
+
+        border-radius:25px;
+
+        padding:
+        65px 20px;
+
+    }
+
+
+    .footer-container{
+
+        flex-direction:column;
+
+        gap:15px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<nav class="navbar">
+
+    <div class="nav-container">
+
+        <a href="#" class="logo">
+            <span>.</span>NOVA
+        </a>
+
+
+        <div class="nav-links">
+
+            <a href="#features">
+                المميزات
+            </a>
+
+            <a href="#how">
+                كيف تعمل؟
+            </a>
+
+            <a href="#pricing">
+                الأسعار
+            </a>
+
+            <a href="#faq">
+                الأسئلة
+            </a>
+
+        </div>
+
+
+        <div class="nav-buttons">
+
+            <a href="loading.html"
+               class="btn btn-white">
+
+                تسجيل الدخول
+
+            </a>
+
+
+            <a href="loading.html"
+               class="btn btn-black">
+
+                ابدأ مجاناً
+
+            </a>
+
+            <button
+                class="menu-button"
+                onclick="toggleMenu()">
+
+                ☰
+
+            </button>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- MOBILE MENU -->
+
+<div class="mobile-menu" id="mobileMenu">
+
+    <a href="#features"
+       onclick="closeMenu()">
+
+        ✦ المميزات
+
+    </a>
+
+    <a href="#how"
+       onclick="closeMenu()">
+
+        ⚡ كيف تعمل؟
+
+    </a>
+
+    <a href="#pricing"
+       onclick="closeMenu()">
+
+        💰 الأسعار
+
+    </a>
+
+    <a href="#faq"
+       onclick="closeMenu()">
+
+        ❔ الأسئلة الشائعة
+
+    </a>
+
+    <a href="loading.html">
+
+        🚀 ابدأ الآن
+
+    </a>
+
+</div>
+
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+    <div class="hero-container">
+
+
+        <div class="hero-content">
+
+
+            <div class="hero-badge">
+
+                <span class="hero-badge-dot"></span>
+
+                منصة متجرك الإلكتروني
+
+            </div>
+
+
+            <h1>
+
+                التجارة عليك،
+                <span class="gold">
+                    والمتجر علينا.
+                </span>
+
+            </h1>
+
+
+            <div class="hero-subtitle">
+
+                تجارتك في جيبك.
+
+            </div>
+
+
+            <p class="hero-description">
+
+                أنشئ متجرك الإلكتروني،
+                أضف منتجاتك، استقبل طلباتك،
+                وأدر تجارتك من مكان واحد.
+                <br>
+                <b>
+                    بدون برمجة وبدون تعقيد.
+                </b>
+
+            </p>
+
+
+            <div class="hero-buttons">
+
+
+                <a href="loading.html"
+                   class="btn btn-black hero-main-btn">
+
+                    🚀 ابدأ تجربتك المجانية
+
+                </a>
+
+
+                <a href="#pricing"
+                   class="btn btn-white hero-main-btn">
+
+                    شاهد الأسعار
+
+                </a>
+
+
+            </div>
+
+
+            <div class="hero-small">
+
+                تجربة مجانية لمدة 10 أيام • بدون التزام
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- STORE PREVIEW -->
+
+        <div class="mockup">
+
+            <div class="mockup-card">
+
+
+                <div class="mockup-top">
+
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+
+                </div>
+
+
+                <div class="store">
+
+
+                    <div class="store-header">
+
+                        <div class="store-icons">
+
+                            <div class="store-icon">
+                                🛒
+                            </div>
+
+                        </div>
+
+
+                        <div class="store-logo">
+
+                            <span>.</span>NOVA
+
+                        </div>
+
+
+                        <div class="store-icons">
+
+                            <div class="store-icon">
+                                ⌕
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="store-banner">
+
+                        <small>
+                            COLLECTION 2026
+                        </small>
+
+                        <h3>
+                            أسلوبك يبدأ هنا
+                        </h3>
+
+                        <span class="shop-btn">
+                            تسوق الآن
+                        </span>
+
+                    </div>
+
+
+
+                    <div class="store-section-title">
+
+                        الأكثر مبيعاً
+
+                    </div>
+
+
+                    <div class="products">
+
+
+                        <div class="product">
+
+                            <div class="product-img"></div>
+
+                            <div class="product-info">
+
+                                <small>
+                                    حقائب
+                                </small>
+
+                                <b>
+                                    Leather Bag
+                                </b>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="product">
+
+                            <div class="product-img"></div>
+
+                            <div class="product-info">
+
+                                <small>
+                                    إلكترونيات
+                                </small>
+
+                                <b>
+                                    Headphones
+                                </b>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="product">
+
+                            <div class="product-img"></div>
+
+                            <div class="product-info">
+
+                                <small>
+                                    ساعات
+                                </small>
+
+                                <b>
+                                    Watch
+                                </b>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="floating-card">
+
+                <small>
+                    متجرك جاهز
+                </small>
+
+                <strong>
+                    🚀 ابدأ الآن
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FEATURES
+===================================================== -->
+
+<section class="section"
+         id="features">
+
+    <div class="section-container">
+
+
+        <div class="section-heading">
+
+            <div class="mini">
+                كل ما تحتاجه
+            </div>
+
+            <h2>
+                تجارتك بمكان واحد
+            </h2>
+
+            <p>
+                NOVA تجمع لك الأدوات الأساسية
+                التي تحتاجها لإدارة متجرك
+                بطريقة بسيطة وواضحة.
+            </p>
+
+        </div>
+
+
+
+        <div class="features">
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    🛍️
+                </div>
+
+                <h3>
+                    متجرك الإلكتروني
+                </h3>
+
+                <p>
+                    أنشئ متجرك وابدأ بعرض
+                    منتجاتك أمام عملائك.
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    📦
+                </div>
+
+                <h3>
+                    إدارة المنتجات
+                </h3>
+
+                <p>
+                    أضف المنتجات والصور والأسعار
+                    ونظمها ضمن الأقسام.
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    🧾
+                </div>
+
+                <h3>
+                    إدارة الطلبات
+                </h3>
+
+                <p>
+                    تابع طلبات عملائك
+                    ونظم عمليات البيع بسهولة.
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    📊
+                </div>
+
+                <h3>
+                    لوحة تحكم
+                </h3>
+
+                <p>
+                    كل معلومات تجارتك
+                    أمامك من مكان واحد.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     HOW IT WORKS
+===================================================== -->
+
+<section class="section"
+         id="how">
+
+    <div class="section-container">
+
+
+        <div class="section-heading">
+
+            <div class="mini">
+                ببساطة
+            </div>
+
+            <h2>
+                من الفكرة إلى المتجر
+            </h2>
+
+            <p>
+                ثلاث خطوات وتكون جاهز
+                تبدأ تجارتك على الإنترنت.
+            </p>
+
+        </div>
+
+
+
+        <div class="steps">
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    01
+                </div>
+
+                <h3>
+                    أنشئ حسابك
+                </h3>
+
+                <p>
+                    سجل حسابك وابدأ بتجهيز
+                    متجرك الإلكتروني.
+                </p>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    02
+                </div>
+
+                <h3>
+                    جهّز متجرك
+                </h3>
+
+                <p>
+                    أضف منتجاتك وأقسامك
+                    وصورك واضبط إعدادات متجرك.
+                </p>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    03
+                </div>
+
+                <h3>
+                    شارك متجرك
+                </h3>
+
+                <p>
+                    شارك رابط متجرك مع عملائك
+                    وابدأ باستقبال الطلبات.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-container">
+
+
+        <div class="showcase-wrapper">
+
+
+            <div class="showcase-text">
+
+                <div class="mini">
+                    لوحة تحكم NOVA
+                </div>
+
+
+                <h2>
+                    كل تجارتك
+                    بمكان واحد.
+                </h2>
+
+
+                <p>
+                    من المنتجات إلى الطلبات،
+                    كل شيء مصمم حتى يكون
+                    واضح وسهل الإدارة.
+                </p>
+
+
+                <ul class="checks">
+
+                    <li>
+                        إدارة المنتجات
+                    </li>
+
+                    <li>
+                        إدارة الأقسام
+                    </li>
+
+                    <li>
+                        إدارة الطلبات
+                    </li>
+
+                    <li>
+                        الفواتير
+                    </li>
+
+                    <li>
+                        طرق الدفع
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+
+            <div class="dashboard">
+
+                <div class="dashboard-head"></div>
+
+
+                <div class="dashboard-content">
+
+
+                    <div class="dashboard-side">
+
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+
+                    </div>
+
+
+                    <div class="dashboard-main">
+
+
+                        <div class="stat">
+
+                            <small>
+                                المنتجات
+                            </small>
+
+                            <strong>
+                                128
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat">
+
+                            <small>
+                                الطلبات
+                            </small>
+
+                            <strong>
+                                64
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat">
+
+                            <small>
+                                الأقسام
+                            </small>
+
+                            <strong>
+                                12
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat">
+
+                            <small>
+                                المبيعات
+                            </small>
+
+                            <strong>
+                                2.4K
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PRICING
+===================================================== -->
+
+<section class="section pricing-section"
+         id="pricing">
+
+    <div class="section-container">
+
+
+        <div class="section-heading">
+
+            <div class="mini">
+                أسعار بسيطة
+            </div>
+
+            <h2>
+                اختر خطتك وابدأ
+            </h2>
+
+            <p>
+                جرّب NOVA لمدة 10 أيام مجاناً،
+                وبعدها اختر الخطة المناسبة لتجارتك.
+            </p>
+
+        </div>
+
+
+
+        <div class="pricing">
+
+
+            <!-- MONTHLY -->
+
+            <div class="price-card">
+
+
+                <div class="price-name">
+                    الخطة الشهرية
+                </div>
+
+
+                <div class="price-title">
+                    شهري
+                </div>
+
+
+                <div class="price">
+
+                    <strong>
+                        $10
+                    </strong>
+
+                    <span>
+                        / شهر
+                    </span>
+
+                </div>
+
+
+                <div class="price-description">
+
+                    ادفع شهرياً واستمتع
+                    بكل أدوات NOVA.
+
+                </div>
+
+
+                <ul class="price-list">
+
+                    <li>
+                        متجر إلكتروني
+                    </li>
+
+                    <li>
+                        إدارة المنتجات
+                    </li>
+
+                    <li>
+                        إدارة الطلبات
+                    </li>
+
+                    <li>
+                        لوحة تحكم كاملة
+                    </li>
+
+                    <li>
+                        الفواتير وطرق الدفع
+                    </li>
+
+                </ul>
+
+
+                <a href="loading.html"
+                   class="btn btn-black price-btn">
+
+                    اشترك الآن
+
+                </a>
+
+
+            </div>
+
+
+
+            <!-- YEARLY -->
+
+            <div class="price-card featured">
+
+
+                <div class="popular">
+                    الأفضل قيمة
+                </div>
+
+
+                <div class="price-name">
+                    الخطة السنوية
+                </div>
+
+
+                <div class="price-title">
+                    سنوي
+                </div>
+
+
+                <div class="price">
+
+                    <strong>
+                        $100
+                    </strong>
+
+                    <span>
+                        / سنة
+                    </span>
+
+                </div>
+
+
+                <div class="price-description">
+
+                    وفر أكثر مع الاشتراك السنوي.
+
+                </div>
+
+
+                <div class="saving">
+
+                    وفر $20 سنوياً
+
+                </div>
+
+
+                <ul class="price-list">
+
+                    <li>
+                        متجر إلكتروني
+                    </li>
+
+                    <li>
+                        إدارة المنتجات
+                    </li>
+
+                    <li>
+                        إدارة الطلبات
+                    </li>
+
+                    <li>
+                        لوحة تحكم كاملة
+                    </li>
+
+                    <li>
+                        الفواتير وطرق الدفع
+                    </li>
+
+                </ul>
+
+
+                <a href="loading.html"
+                   class="btn btn-black price-btn">
+
+                    ⭐ اشترك الآن
+
+                </a>
+
+
+            </div>
+
+
+        </div>
+
+
+        <div style="
+            text-align:center;
+            margin-top:25px;
+            color:#999;
+            font-size:12px;
+        ">
+
+            السعر الشهري يعادل $120 سنوياً،
+            بينما الخطة السنوية تكلفك $100 فقط.
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FAQ
+===================================================== -->
+
+<section class="section"
+         id="faq">
+
+    <div class="section-container">
+
+
+        <div class="section-heading">
+
+            <div class="mini">
+                الأسئلة الشائعة
+            </div>
+
+            <h2>
+                عندك سؤال؟
+            </h2>
+
+            <p>
+                جمعنا لك أهم الأسئلة
+                التي ممكن تخطر ببالك.
+            </p>
+
+        </div>
+
+
+
+        <div class="faq">
+
+
+            <details>
+
+                <summary>
+                    هل أحتاج خبرة بالبرمجة؟
+                </summary>
+
+                <p>
+                    لا. NOVA مصممة لتكون سهلة
+                    ولا تحتاج منك كتابة أكواد.
+                </p>
+
+            </details>
+
+
+            <details>
+
+                <summary>
+                    كم مدة التجربة المجانية؟
+                </summary>
+
+                <p>
+                    تحصل على تجربة مجانية
+                    لمدة 10 أيام حتى تجرب المنصة
+                    وتتعرف على أدواتها.
+                </p>
+
+            </details>
+
+
+            <details>
+
+                <summary>
+                    كم سعر الاشتراك؟
+                </summary>
+
+                <p>
+                    الاشتراك الشهري 10 دولارات،
+                    والاشتراك السنوي 100 دولار.
+                </p>
+
+            </details>
+
+
+            <details>
+
+                <summary>
+                    هل يمكنني إدارة متجري من الهاتف؟
+                </summary>
+
+                <p>
+                    نعم، NOVA مصممة لتعمل
+                    بشكل مناسب على الهاتف
+                    والأجهزة المختلفة.
+                </p>
+
+            </details>
+
+
+            <details>
+
+                <summary>
+                    هل أحصل على رابط خاص لمتجري؟
+                </summary>
+
+                <p>
+                    نعم، يحصل متجرك على رابط
+                    خاص يمكنك مشاركته مع عملائك.
+                </p>
+
+            </details>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FINAL CTA
+===================================================== -->
+
+<section class="final">
+
+
+    <div class="final-box">
+
+
+        <h2>
+
+            التجارة عليك،
+            <span>
+                والمتجر علينا.
+            </span>
+
+        </h2>
+
+
+        <p>
+
+            ابدأ تجربتك المجانية لمدة 10 أيام
+            وخلي تجارتك تكون أقرب لعملائك.
+
+        </p>
+
+
+        <a href="loading.html"
+           class="btn">
+
+            🚀 ابدأ متجرك الآن
+
+        </a>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+    <div class="footer-container">
+
+
+        <div class="footer-logo">
+
+            <span>.</span>NOVA
+
+        </div>
+
+
+        <div class="footer-copy">
+
+            © 2026 NOVA — جميع الحقوق محفوظة
+
+        </div>
+
+
+    </div>
+
+</footer>
+
+
+
+<script>
+
+/* =====================================================
+   MOBILE MENU
+===================================================== */
+
+function toggleMenu(){
+
+    const menu =
+        document.getElementById("mobileMenu");
+
+    menu.classList.toggle("active");
+
+}
+
+
+function closeMenu(){
+
+    const menu =
+        document.getElementById("mobileMenu");
+
+    menu.classList.remove("active");
+
+}
+
+
+/* close menu when clicking outside */
+
+document.addEventListener(
+    "click",
+    function(e){
+
+        const menu =
+            document.getElementById("mobileMenu");
+
+        const button =
+            document.querySelector(".menu-button");
+
+        if(
+            menu.classList.contains("active") &&
+            !menu.contains(e.target) &&
+            !button.contains(e.target)
+        ){
+
+            menu.classList.remove("active");
+
+        }
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>

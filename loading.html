@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
+
+<title>NOVA - تسجيل الدخول</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Arial,Tahoma,sans-serif;
+  background:#f4f5f8;
+  color:#17171d;
+  min-height:100vh;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+}
+
+.container{
+  width:100%;
+  max-width:430px;
+}
+
+.logo{
+  text-align:center;
+  font-size:42px;
+  font-weight:900;
+  letter-spacing:-2px;
+  margin-bottom:8px;
+}
+
+.subtitle{
+  text-align:center;
+  color:#777;
+  margin-bottom:25px;
+}
+
+.card{
+  background:#fff;
+  border-radius:22px;
+  padding:25px;
+
+  box-shadow:
+    0 10px 35px rgba(0,0,0,.08);
+}
+
+/* =========================
+   TABS
+========================= */
+
+.tabs{
+  display:flex;
+
+  background:#f1f1f4;
+
+  padding:4px;
+
+  border-radius:13px;
+
+  margin-bottom:22px;
+}
+
+.tab{
+  width:50%;
+
+  border:0;
+
+  background:transparent;
+
+  padding:12px;
+
+  border-radius:10px;
+
+  font-size:15px;
+
+  cursor:pointer;
+}
+
+.tab.active{
+  background:#17171d;
+  color:#fff;
+}
+
+
+/* =========================
+   INPUTS
+========================= */
+
+.field{
+  margin-bottom:15px;
+}
+
+.pwrap{
+  position:relative;
+}
+
+.pwrap input{
+  padding-left:44px;
+}
+
+.eye-btn{
+  position:absolute;
+  top:50%;
+  left:10px;
+  transform:translateY(-50%);
+
+  width:32px;
+  height:32px;
+
+  border:0;
+  background:transparent;
+
+  font-size:18px;
+  line-height:1;
+
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  opacity:.55;
+  transition:.15s;
+}
+
+.eye-btn:hover{
+  opacity:1;
+}
+
+label{
+  display:block;
+
+  margin-bottom:7px;
+
+  font-size:14px;
+
+  font-weight:bold;
+}
+
+input{
+  width:100%;
+
+  height:48px;
+
+  border:1px solid #ddd;
+
+  border-radius:12px;
+
+  padding:0 14px;
+
+  font-size:15px;
+
+  outline:none;
+}
+
+input:focus{
+  border-color:#17171d;
+}
+
+
+/* =========================
+   BUTTON
+========================= */
+
+.main-btn{
+  width:100%;
+
+  height:50px;
+
+  border:0;
+
+  border-radius:13px;
+
+  background:#17171d;
+
+  color:#fff;
+
+  font-size:16px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+  margin-top:5px;
+}
+
+.main-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+.message{
+  display:none;
+
+  padding:12px;
+
+  border-radius:11px;
+
+  margin-bottom:15px;
+
+  font-size:14px;
+
+  text-align:center;
+}
+
+.message.error{
+  display:block;
+
+  background:#fff0f0;
+
+  color:#c62828;
+}
+
+.message.success{
+  display:block;
+
+  background:#effaf1;
+
+  color:#218838;
+}
+
+.loading{
+  display:none;
+
+  text-align:center;
+
+  margin-top:12px;
+
+  color:#777;
+
+  font-size:14px;
+}
+
+
+/* =========================
+   LINKS PAGE
+========================= */
+
+#linksPage{
+  display:none;
+}
+
+.welcome{
+  text-align:center;
+
+  margin-bottom:22px;
+}
+
+.welcome h2{
+  margin-bottom:7px;
+}
+
+.welcome p{
+  color:#777;
+}
+
+
+/* =========================
+   LINK BOX
+========================= */
+
+.link-box{
+  background:#f6f6f8;
+
+  border:1px solid #e5e5e8;
+
+  border-radius:14px;
+
+  padding:14px;
+
+  margin-bottom:12px;
+}
+
+.link-title{
+  font-weight:bold;
+
+  margin-bottom:8px;
+}
+
+.link{
+  direction:ltr;
+
+  text-align:left;
+
+  background:#fff;
+
+  border:1px solid #ddd;
+
+  border-radius:9px;
+
+  padding:10px;
+
+  font-size:12px;
+
+  overflow:hidden;
+
+  white-space:nowrap;
+
+  text-overflow:ellipsis;
+}
+
+
+/* =========================
+   LINK BUTTONS
+========================= */
+
+.link-actions{
+  display:flex;
+
+  gap:8px;
+
+  margin-top:9px;
+}
+
+.link-actions a,
+.link-actions button{
+  flex:1;
+
+  height:42px;
+
+  border:0;
+
+  border-radius:10px;
+
+  cursor:pointer;
+
+  text-decoration:none;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  font-size:14px;
+
+  font-weight:bold;
+}
+
+.open-btn{
+  background:#17171d;
+
+  color:#fff;
+}
+
+.copy-btn{
+  background:#e9e9ed;
+
+  color:#17171d;
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+.logout{
+  width:100%;
+
+  height:45px;
+
+  margin-top:15px;
+
+  border:1px solid #ddd;
+
+  background:#fff;
+
+  border-radius:12px;
+
+  cursor:pointer;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<!-- =====================================================
+     AUTH PAGE
+===================================================== -->
+
+<div
+  class="card"
+  id="authPage"
+>
+
+  <div class="logo">
+    NOVA
+  </div>
+
+  <div class="subtitle">
+    إنشاء وإدارة متجرك بسهولة
+  </div>
+
+
+  <!-- TABS -->
+
+  <div class="tabs">
+
+    <button
+      class="tab active"
+      id="loginTab"
+      onclick="showLogin()"
+    >
+      تسجيل الدخول
+    </button>
+
+
+    <button
+      class="tab"
+      id="registerTab"
+      onclick="showRegister()"
+    >
+      إنشاء حساب
+    </button>
+
+  </div>
+
+
+  <!-- MESSAGE -->
+
+  <div
+    id="message"
+    class="message"
+  ></div>
+
+
+  <!-- NAME -->
+
+  <div
+    id="nameField"
+    class="field"
+    style="display:none"
+  >
+
+    <label>
+      الاسم
+    </label>
+
+    <input
+      id="name"
+      type="text"
+      placeholder="اكتب اسمك"
+      autocomplete="name"
+    >
+
+  </div>
+
+
+  <!-- PHONE -->
+
+  <div class="field">
+
+    <label>
+      رقم الهاتف
+    </label>
+
+    <input
+      id="phone"
+      type="tel"
+      placeholder="رقم الهاتف"
+      autocomplete="tel"
+    >
+
+  </div>
+
+
+  <!-- PASSWORD -->
+
+  <div class="field">
+
+    <label>
+      كلمة المرور
+    </label>
+
+    <div class="pwrap">
+
+      <input
+        id="password"
+        type="password"
+        placeholder="كلمة المرور"
+        autocomplete="current-password"
+      >
+
+      <button
+        class="eye-btn"
+        type="button"
+        onclick="togglePassword('password', this)"
+        tabindex="-1"
+        aria-label="إظهار كلمة المرور"
+      >👁️</button>
+
+    </div>
+
+  </div>
+
+
+  <!-- PASSWORD CONFIRM -->
+
+  <div
+    class="field"
+    id="confirmField"
+    style="display:none"
+  >
+
+    <label>
+      تأكيد كلمة المرور
+    </label>
+
+    <div class="pwrap">
+
+      <input
+        id="passwordConfirm"
+        type="password"
+        placeholder="أعد كتابة كلمة المرور"
+        autocomplete="new-password"
+      >
+
+      <button
+        class="eye-btn"
+        type="button"
+        onclick="togglePassword('passwordConfirm', this)"
+        tabindex="-1"
+        aria-label="إظهار تأكيد كلمة المرور"
+      >👁️</button>
+
+    </div>
+
+  </div>
+
+
+  <!-- SUBMIT -->
+
+  <button
+    class="main-btn"
+    id="submitBtn"
+    onclick="submitAuth()"
+  >
+    تسجيل الدخول
+  </button>
+
+
+  <div
+    class="loading"
+    id="loading"
+  >
+    جارٍ المعالجة...
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     LINKS PAGE
+===================================================== -->
+
+<div
+  class="card"
+  id="linksPage"
+>
+
+  <div class="welcome">
+
+    <h2 id="welcomeName">
+      أهلاً 👋
+    </h2>
+
+    <p>
+      روابط مشروعك جاهزة
+    </p>
+
+  </div>
+
+
+  <!-- ADMIN LINK -->
+
+  <div class="link-box">
+
+    <div class="link-title">
+      🔧 إدارة المتجر
+    </div>
+
+
+    <div
+      class="link"
+      id="adminLink"
+    >
+      -
+    </div>
+
+
+    <div class="link-actions">
+
+      <a
+        id="openAdmin"
+        class="open-btn"
+        target="_blank"
+      >
+        فتح الإدارة
+      </a>
+
+
+      <button
+        class="copy-btn"
+        onclick="copyLink('adminLink')"
+      >
+        نسخ الرابط
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- STORE LINK -->
+
+  <div class="link-box">
+
+    <div class="link-title">
+      🛒 المتجر
+    </div>
+
+
+    <div
+      class="link"
+      id="storeLink"
+    >
+      -
+    </div>
+
+
+    <div class="link-actions">
+
+      <a
+        id="openStore"
+        class="open-btn"
+        target="_blank"
+      >
+        فتح المتجر
+      </a>
+
+
+      <button
+        class="copy-btn"
+        onclick="copyLink('storeLink')"
+      >
+        نسخ الرابط
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ORDERS LINK -->
+
+  <div class="link-box">
+
+    <div class="link-title">
+      🧾 الطلبات (لشركة التوصيل)
+    </div>
+
+
+    <div
+      class="link"
+      id="ordersLink"
+    >
+      -
+    </div>
+
+
+    <div class="link-actions">
+
+      <a
+        id="openOrders"
+        class="open-btn"
+        target="_blank"
+      >
+        فتح صفحة الطلبات
+      </a>
+
+
+      <button
+        class="copy-btn"
+        onclick="copyLink('ordersLink')"
+      >
+        نسخ الرابط
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <button
+    class="logout"
+    onclick="logout()"
+  >
+    تسجيل الخروج
+  </button>
+
+</div>
+
+
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   NOVA LOGIN + REGISTER
+========================================================= */
+
+
+/* =========================
+   SUPABASE
+========================= */
+
+const SUPABASE_URL =
+"https://xtsumqxirkziawlmttbg.supabase.co";
+
+
+const SUPABASE_KEY =
+"sb_publishable_lRFYcFpwW28NhSyPfxg2AA_RF9ZO7-F";
+
+
+const {
+  createClient
+} = supabase;
+
+
+const db =
+createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let mode = "login";
+
+
+/* =========================================================
+   BASE URL
+========================================================= */
+
+function getBaseURL(){
+
+  let base =
+    window.location.href.substring(
+      0,
+      window.location.href.lastIndexOf("/") + 1
+    );
+
+  if(
+    base.startsWith("http://")
+  ){
+    base =
+      "https://" +
+      base.substring(7);
+  }
+
+  return base;
+
+}
+
+
+/* =========================================================
+   ADMIN URL
+========================================================= */
+
+function getAdminURL(storeId){
+
+  return getBaseURL() +
+    "admin.html?store=" +
+    encodeURIComponent(storeId);
+
+}
+
+
+/* =========================================================
+   STORE URL
+========================================================= */
+
+function getStoreURL(storeId){
+
+  return getBaseURL() +
+    "store.html?store=" +
+    encodeURIComponent(storeId);
+
+}
+
+
+/* =========================================================
+   ORDERS URL
+========================================================= */
+
+function getOrdersURL(storeId){
+
+  return getBaseURL() +
+    "orders.html?store=" +
+    encodeURIComponent(storeId);
+
+}
+
+
+/* =========================================================
+   TOGGLE PASSWORD VISIBILITY
+========================================================= */
+
+function togglePassword(
+  id,
+  btn
+){
+
+  const input =
+    document
+      .getElementById(
+        id
+      );
+
+
+  if(!input || !btn)
+    return;
+
+
+  const isHidden =
+    input.type === "password";
+
+
+  input.type =
+    isHidden
+      ? "text"
+      : "password";
+
+
+  btn.textContent =
+    isHidden
+      ? "🙈"
+      : "👁️";
+
+}
+
+
+/* =========================================================
+   LOGIN TAB
+========================================================= */
+
+function showLogin(){
+
+  mode = "login";
+
+
+  document
+    .getElementById("loginTab")
+    .classList
+    .add("active");
+
+
+  document
+    .getElementById("registerTab")
+    .classList
+    .remove("active");
+
+
+  document
+    .getElementById("nameField")
+    .style
+    .display = "none";
+
+
+  document
+    .getElementById("confirmField")
+    .style
+    .display = "none";
+
+
+  document
+    .getElementById("submitBtn")
+    .textContent =
+    "تسجيل الدخول";
+
+
+  clearMessage();
+
+}
+
+
+/* =========================================================
+   REGISTER TAB
+========================================================= */
+
+function showRegister(){
+
+  mode = "register";
+
+
+  document
+    .getElementById("registerTab")
+    .classList
+    .add("active");
+
+
+  document
+    .getElementById("loginTab")
+    .classList
+    .remove("active");
+
+
+  document
+    .getElementById("nameField")
+    .style
+    .display = "block";
+
+
+  document
+    .getElementById("confirmField")
+    .style
+    .display = "block";
+
+
+  document
+    .getElementById("submitBtn")
+    .textContent =
+    "إنشاء الحساب";
+
+
+  clearMessage();
+
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(
+  text,
+  type
+){
+
+  const box =
+    document
+      .getElementById("message");
+
+
+  box.textContent =
+    text;
+
+
+  box.className =
+    "message " + type;
+
+}
+
+
+/* =========================================================
+   CLEAR MESSAGE
+========================================================= */
+
+function clearMessage(){
+
+  const box =
+    document
+      .getElementById("message");
+
+
+  box.textContent =
+    "";
+
+
+  box.className =
+    "message";
+
+}
+
+
+/* =========================================================
+   HASH PASSWORD
+========================================================= */
+
+async function hashPassword(
+  password
+){
+
+  const encoder =
+    new TextEncoder();
+
+
+  const data =
+    encoder.encode(
+      password
+    );
+
+
+  const hash =
+    await crypto.subtle.digest(
+      "SHA-256",
+      data
+    );
+
+
+  return Array
+    .from(
+      new Uint8Array(hash)
+    )
+    .map(
+      b =>
+      b
+        .toString(16)
+        .padStart(2,"0")
+    )
+    .join("");
+
+}
+
+
+/* =========================================================
+   SUBMIT AUTH
+========================================================= */
+
+async function submitAuth(){
+
+  clearMessage();
+
+
+  const name =
+    document
+      .getElementById("name")
+      .value
+      .trim();
+
+
+  const phone =
+    document
+      .getElementById("phone")
+      .value
+      .trim();
+
+
+  const password =
+    document
+      .getElementById("password")
+      .value;
+
+
+  const passwordConfirm =
+    document
+      .getElementById("passwordConfirm")
+      .value;
+
+
+  /* =========================
+     VALIDATION
+  ========================= */
+
+  if(
+    mode === "register" &&
+    !name
+  ){
+
+    showMessage(
+      "اكتب الاسم أولاً",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(!phone){
+
+    showMessage(
+      "اكتب رقم الهاتف",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(!password){
+
+    showMessage(
+      "اكتب كلمة المرور",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(password.length < 4){
+
+    showMessage(
+      "كلمة المرور يجب أن تكون 4 أحرف على الأقل",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    mode === "register" &&
+    !passwordConfirm
+  ){
+
+    showMessage(
+      "أعد كتابة كلمة المرور للتأكيد",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(
+    mode === "register" &&
+    password !== passwordConfirm
+  ){
+
+    showMessage(
+      "كلمتا المرور غير متطابقتين",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  /* =========================
+     LOADING
+  ========================= */
+
+  const btn =
+    document
+      .getElementById("submitBtn");
+
+
+  btn.disabled =
+    true;
+
+
+  document
+    .getElementById("loading")
+    .style
+    .display =
+    "block";
+
+
+  try{
+
+    const passwordHash =
+      await hashPassword(
+        password
+      );
+
+
+    /* =====================================================
+       REGISTER
+    ===================================================== */
+
+    if(mode === "register"){
+
+      /* ================================================
+         CHECK PHONE
+      ================================================ */
+
+      const {
+        data: existingUser,
+        error: checkError
+      } =
+      await db
+        .from("nova_users")
+        .select("id")
+        .eq("phone",phone)
+        .maybeSingle();
+
+
+      if(checkError){
+
+        throw checkError;
+
+      }
+
+
+      if(existingUser){
+
+        throw new Error(
+          "رقم الهاتف مسجل مسبقاً"
+        );
+
+      }
+
+
+      /* ================================================
+         GET PROJECT 1
+      ================================================ */
+
+      const {
+        data: project,
+        error: projectError
+      } =
+      await db
+        .from("projects")
+        .select("id")
+        .eq(
+          "name",
+          "Project 1"
+        )
+        .order(
+          "created_at",
+          {
+            ascending:true
+          }
+        )
+        .limit(1)
+        .maybeSingle();
+
+
+      if(projectError){
+
+        console.error(
+          "PROJECT ERROR:",
+          projectError
+        );
+
+        throw new Error(
+          "تعذر الوصول إلى المشروع"
+        );
+
+      }
+
+
+      if(!project){
+
+        throw new Error(
+          "لم يتم العثور على Project 1"
+        );
+
+      }
+
+
+      /* ================================================
+         CREATE SLUG
+      ================================================ */
+
+      const slug =
+        "nova-" +
+        crypto
+          .randomUUID()
+          .replaceAll("-","")
+          .substring(0,12);
+
+
+      /* ================================================
+         TRIAL
+      ================================================ */
+
+      const trialDays =
+        7;
+
+
+      const trialStartedAt =
+        new Date();
+
+
+      const trialExpiresAt =
+        new Date(
+          trialStartedAt.getTime() +
+          trialDays *
+          24 *
+          60 *
+          60 *
+          1000
+        );
+
+
+      /* ================================================
+         CREATE STORE
+      ================================================ */
+
+      const {
+        data: store,
+        error: storeError
+      } =
+      await db
+        .from("stores")
+        .insert({
+
+          name:
+            name + " Store",
+
+          slug:
+            slug,
+
+          project_id:
+            project.id,
+
+          trial_days:
+            trialDays,
+
+          trial_started_at:
+            trialStartedAt.toISOString(),
+
+          expires_at:
+            trialExpiresAt.toISOString(),
+
+          status:
+            "trial",
+
+          is_active:
+            true
+
+        })
+        .select("id")
+        .single();
+
+
+      if(storeError){
+
+        console.error(
+          "STORE ERROR:",
+          storeError
+        );
+
+        throw new Error(
+          "تعذر إنشاء المتجر: " +
+          storeError.message
+        );
+
+      }
+
+
+      /* ================================================
+         STORE UUID
+      ================================================ */
+
+      const storeId =
+        store.id;
+
+
+      /* ================================================
+         CREATE USER
+      ================================================ */
+
+      const {
+        data: user,
+        error: userError
+      } =
+      await db
+        .from("nova_users")
+        .insert({
+
+          name:
+            name,
+
+          phone:
+            phone,
+
+          password_hash:
+            passwordHash,
+
+          store_id:
+            storeId
+
+        })
+        .select()
+        .single();
+
+
+      if(userError){
+
+        console.error(
+          "USER ERROR:",
+          userError
+        );
+
+
+        /* ================================================
+           DELETE STORE IF USER CREATION FAILED
+        ================================================ */
+
+        await db
+          .from("stores")
+          .delete()
+          .eq(
+            "id",
+            storeId
+          );
+
+
+        if(
+          userError.code ===
+          "23505"
+        ){
+
+          throw new Error(
+            "رقم الهاتف مسجل مسبقاً"
+          );
+
+        }
+
+
+        throw new Error(
+          "تعذر إنشاء الحساب: " +
+          userError.message
+        );
+
+      }
+
+
+      /* ================================================
+         SAVE USER
+      ================================================ */
+
+      localStorage.setItem(
+        "nova_user",
+        JSON.stringify(user)
+      );
+
+
+      /* ================================================
+         SHOW LINKS
+      ================================================ */
+
+      showProjectLinks(
+        user.name,
+        user.store_id
+      );
+
+
+      return;
+
+    }
+
+
+    /* =====================================================
+       LOGIN
+    ===================================================== */
+
+    const {
+      data: user,
+      error: loginError
+    } =
+    await db
+      .from("nova_users")
+      .select("*")
+      .eq(
+        "phone",
+        phone
+      )
+      .eq(
+        "password_hash",
+        passwordHash
+      )
+      .maybeSingle();
+
+
+    if(loginError){
+
+      throw loginError;
+
+    }
+
+
+    if(!user){
+
+      throw new Error(
+        "رقم الهاتف أو كلمة المرور غير صحيحة"
+      );
+
+    }
+
+
+    /* ================================================
+       SAVE USER
+    ================================================ */
+
+    localStorage.setItem(
+      "nova_user",
+      JSON.stringify(user)
+    );
+
+
+    /* ================================================
+       SHOW LINKS
+    ================================================ */
+
+    showProjectLinks(
+      user.name,
+      user.store_id
+    );
+
+  }
+
+  catch(error){
+
+    console.error(
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      "حدث خطأ، حاول مرة ثانية",
+      "error"
+    );
+
+  }
+
+  finally{
+
+    btn.disabled =
+      false;
+
+
+    document
+      .getElementById("loading")
+      .style
+      .display =
+      "none";
+
+  }
+
+}
+
+
+/* =========================================================
+   SHOW PROJECT LINKS
+========================================================= */
+
+function showProjectLinks(
+  name,
+  storeId
+){
+
+  const adminURL =
+    getAdminURL(
+      storeId
+    );
+
+
+  const storeURL =
+    getStoreURL(
+      storeId
+    );
+
+
+  const ordersURL =
+    getOrdersURL(
+      storeId
+    );
+
+
+  document
+    .getElementById("welcomeName")
+    .textContent =
+    "أهلاً " +
+    name +
+    " 👋";
+
+
+  document
+    .getElementById("adminLink")
+    .textContent =
+    adminURL;
+
+
+  document
+    .getElementById("storeLink")
+    .textContent =
+    storeURL;
+
+
+  document
+    .getElementById("ordersLink")
+    .textContent =
+    ordersURL;
+
+
+  document
+    .getElementById("openAdmin")
+    .href =
+    adminURL;
+
+
+  document
+    .getElementById("openStore")
+    .href =
+    storeURL;
+
+
+  document
+    .getElementById("openOrders")
+    .href =
+    ordersURL;
+
+
+  document
+    .getElementById("authPage")
+    .style
+    .display =
+    "none";
+
+
+  document
+    .getElementById("linksPage")
+    .style
+    .display =
+    "block";
+
+}
+
+
+/* =========================================================
+   COPY LINK
+========================================================= */
+
+async function copyLink(id){
+
+  const text =
+    document
+      .getElementById(id)
+      .textContent;
+
+
+  try{
+
+    await navigator
+      .clipboard
+      .writeText(text);
+
+
+    alert(
+      "تم نسخ الرابط ✅"
+    );
+
+  }
+
+  catch(error){
+
+    alert(
+      "لم يتم النسخ، انسخ الرابط يدوياً"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function logout(){
+
+  localStorage.removeItem(
+    "nova_user"
+  );
+
+
+  location.reload();
+
+}
+
+
+/* =========================================================
+   AUTO LOGIN
+========================================================= */
+
+function checkSavedUser(){
+
+  const saved =
+    localStorage.getItem(
+      "nova_user"
+    );
+
+
+  if(!saved){
+
+    return false;
+
+  }
+
+
+  try{
+
+    const user =
+      JSON.parse(saved);
+
+
+    if(
+      user &&
+      user.name &&
+      user.store_id
+    ){
+
+      return user;
+
+    }
+
+  }
+
+  catch(error){
+
+    localStorage.removeItem(
+      "nova_user"
+    );
+
+  }
+
+
+  return false;
+
+}
+
+
+/* =========================================================
+   START
+   تُفتح الصفحة دائماً على شاشة تسجيل الدخول.
+   تتم الإحالة إلى روابط المشروع فقط بعد إدخال
+   رقم الهاتف وكلمة المرور يدوياً.
+   (checkSavedUser لا يُستدعى تلقائياً عند الفتح)
+========================================================= */
+
+</script>
+
+</body>
+</html>
