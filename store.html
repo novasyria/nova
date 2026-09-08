@@ -2722,6 +2722,28 @@ function esc(value){
 }
 
 
+function jsStr(value){
+
+    const s = JSON.stringify(String(value ?? ""));
+
+    return s
+
+        .replace(/</g, "\\u003c")
+        .replace(/>/g, "\\u003e")
+        .replace(/'/g, "\\u0027");
+
+}
+
+
+function safeImgSrc(url){
+
+    const u = String(url ?? "");
+
+    return u.startsWith("https:") ? u : "";
+
+}
+
+
 /* =====================================================
    INIT
 ===================================================== */
@@ -2840,7 +2862,7 @@ function renderBanner(){
     bannerContentEl.innerHTML = `
 
         <img
-            src="${esc(
+            src="${safeImgSrc(
                 b.image || ""
             )}"
         >
@@ -2863,9 +2885,9 @@ function renderBanner(){
 
                 <button
                     class="bannerBtn"
-                    onclick="bannerAction('${esc(
+                    onclick='bannerAction(${jsStr(
                         b.link || ""
-                    )}')"
+                    )})'
                 >
                     ${esc(
                         b.button ||
@@ -2905,7 +2927,7 @@ function renderSecondBanner(){
     el.innerHTML = `
 
         <img
-            src="${esc(
+            src="${safeImgSrc(
                 b.image || ""
             )}"
         >
@@ -2928,9 +2950,9 @@ function renderSecondBanner(){
 
                 <button
                     class="bannerBtn"
-                    onclick="bannerAction('${esc(
+                    onclick='bannerAction(${jsStr(
                         b.link || ""
-                    )}')"
+                    )})'
                 >
                     ${esc(
                         b.button ||
@@ -3073,13 +3095,13 @@ function renderCategories(
                         : ""
                     }"
                     data-id="${esc(c.id)}"
-                    onclick="openCategory('${esc(
+                    onclick='openCategory(${jsStr(
                         c.id
-                    )}')"
+                    )})'
                 >
 
                     <img
-                        src="${esc(
+                        src="${safeImgSrc(
                             c.image || ""
                         )}"
                     >
@@ -3661,9 +3683,8 @@ function card(product){
 
             <img
                 loading="lazy"
-                src="${esc(
-                    product.images?.[0] ||
-                    ""
+                src="${safeImgSrc(
+                    product.images?.[0]
                 )}"
                 onclick="
                     openProduct('${esc(
@@ -3850,8 +3871,9 @@ function openProduct(id){
 
 
     mainImage.src =
-        current.images?.[0] ||
-        "";
+        safeImgSrc(
+            current.images?.[0]
+        );
 
 
     const thumbs =
@@ -3874,25 +3896,19 @@ function openProduct(id){
                         ? "active"
                         : ""
                     }"
-                    src="${esc(image)}"
-                    onclick="
-                        document.getElementById(
-                            'mainImage'
-                        ).src='${esc(image)}';
-
+                    src="${safeImgSrc(image)}"
+                    onclick='document.getElementById("mainImage").src=${jsStr(image)};
                         document
-                        .querySelectorAll('.thumb')
+                        .querySelectorAll(".thumb")
                         .forEach(
                             x =>
                             x.classList.remove(
-                                'active'
+                                "active"
                             )
                         );
-
                         this.classList.add(
-                            'active'
-                        );
-                    "
+                            "active"
+                        );'
                 >
 
             `
@@ -4051,12 +4067,10 @@ function renderOptions(){
                                         ? "selected"
                                         : ""
                                     }"
-                                    onclick="
-                                        selectOption(
-                                            ${index},
-                                            '${esc(value)}'
-                                        )
-                                    "
+                                    onclick='selectOption(
+                                        ${index},
+                                        ${jsStr(value)}
+                                    )'
                                 >
 
                                     ${esc(value)}
@@ -4687,9 +4701,8 @@ function renderCart(){
                     <div class="cartItem">
 
                         <img
-                            src="${esc(
-                                product.images?.[0] ||
-                                ""
+                            src="${safeImgSrc(
+                                product.images?.[0]
                             )}"
                         >
 
