@@ -1202,6 +1202,89 @@ async function submitAuth(){
 
 
     /* =====================================================
+       AUTH VIA SECURE RPC (nova_login / nova_register)
+    ===================================================== */
+
+    const authAction =
+      mode === "register"
+      ? "nova_register"
+      : "nova_login";
+
+    const {
+      data: authData,
+      error: authError
+    } =
+    await db.rpc(
+      authAction,
+      {
+        p_name: name,
+        p_phone: phone,
+        p_password_hash: passwordHash
+      }
+    );
+
+
+    if(authError){
+
+      throw authError;
+
+    }
+
+
+    const authResult =
+      Array.isArray(authData)
+      ? authData[0]
+      : authData;
+
+
+    if(
+      authResult &&
+      authResult.error
+    ){
+
+      throw new Error(
+        authResult.error
+      );
+
+    }
+
+
+    const user =
+      authResult &&
+      authResult.user;
+
+
+    if(!user){
+
+      throw new Error(
+        "رقم الهاتف أو كلمة المرور غير صحيحة"
+      );
+
+    }
+
+
+    localStorage.setItem(
+      "nova_user",
+      JSON.stringify({
+        ...user,
+        store_key:
+          (authResult &&
+          authResult.store_key) ||
+          ""
+      })
+    );
+
+
+    showProjectLinks(
+      user.name,
+      user.store_id
+    );
+
+
+    return;
+
+
+    /* =====================================================
        REGISTER
     ===================================================== */
 

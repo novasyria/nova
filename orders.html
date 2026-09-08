@@ -1184,6 +1184,16 @@ async function supabaseRequest(
         "Content-Type": "application/json"
     };
 
+    try{
+        const savedRaw = localStorage.getItem("nova_user");
+        if(savedRaw){
+            const saved = JSON.parse(savedRaw);
+            if(saved && saved.store_key){
+                headers["x-store-key"] = saved.store_key;
+            }
+        }
+    }catch(e){}
+
     if(prefer){
         headers["Prefer"] = prefer;
     }

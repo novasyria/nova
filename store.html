@@ -5644,9 +5644,10 @@ async function confirmOrder(){
            INSERT ORDERS
         ================================================= */
 
-        const orderRows =
+        const orderId =
+            crypto.randomUUID();
 
-            await supabaseRequest(
+        await supabaseRequest(
 
                 "orders",
 
@@ -5659,6 +5660,9 @@ async function confirmOrder(){
                         "?select=*",
 
                     body:[{
+
+                        id:
+                            orderId,
 
                         store_id:
                             data.store.id,
@@ -5699,23 +5703,10 @@ async function confirmOrder(){
             );
 
 
-        if(
-
-            !orderRows ||
-
-            !orderRows.length
-
-        ){
-
-            throw new Error(
-                "لم يتم إنشاء الطلب"
-            );
-
-        }
-
-
-        const createdOrder =
-            orderRows[0];
+        const createdOrder = {
+            id: orderId,
+            created_at: new Date().toISOString()
+        };
 
 
         /* =================================================
