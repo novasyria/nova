@@ -1628,7 +1628,8 @@ async function supabaseRequest(
     const {
         method = "GET",
         query = "",
-        body = null
+        body = null,
+        prefer = null
     } = options;
 
 
@@ -1649,6 +1650,7 @@ async function supabaseRequest(
     if(method !== "GET"){
 
         headers["Prefer"] =
+            prefer ||
             "return=representation";
 
     }
@@ -2564,6 +2566,7 @@ async function loadStore(){
                 "store_visits",
                 {
                     method: "POST",
+                    prefer: "return=minimal",
                     body: {
                         store_id: STORE_ID
                     }
@@ -5657,7 +5660,10 @@ async function confirmOrder(){
                         "POST",
 
                     query:
-                        "?select=*",
+                        "",
+
+                    prefer:
+                        "return=minimal",
 
                     body:[{
 
@@ -5755,7 +5761,10 @@ async function confirmOrder(){
                     "POST",
 
                 query:
-                    "?select=*",
+                    "",
+
+                prefer:
+                    "return=minimal",
 
                 body:
                     itemRows
