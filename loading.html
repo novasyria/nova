@@ -1210,17 +1210,25 @@ async function submitAuth(){
       ? "nova_register"
       : "nova_login";
 
+    const rpcArgs =
+      mode === "register"
+      ? {
+          p_name: name,
+          p_phone: phone,
+          p_password_hash: passwordHash
+        }
+      : {
+          p_phone: phone,
+          p_password_hash: passwordHash
+        };
+
     const {
       data: authData,
       error: authError
     } =
     await db.rpc(
       authAction,
-      {
-        p_name: name,
-        p_phone: phone,
-        p_password_hash: passwordHash
-      }
+      rpcArgs
     );
 
 
