@@ -1249,12 +1249,12 @@ async function submitAuth(){
     }
 
 
-    const user =
+    const signedUser =
       authResult &&
       authResult.user;
 
 
-    if(!user){
+    if(!signedUser){
 
       throw new Error(
         "رقم الهاتف أو كلمة المرور غير صحيحة"
@@ -1266,7 +1266,7 @@ async function submitAuth(){
     localStorage.setItem(
       "nova_user",
       JSON.stringify({
-        ...user,
+        ...signedUser,
         store_key:
           (authResult &&
           authResult.store_key) ||
@@ -1276,8 +1276,8 @@ async function submitAuth(){
 
 
     showProjectLinks(
-      user.name,
-      user.store_id
+      signedUser.name,
+      signedUser.store_id
     );
 
 
