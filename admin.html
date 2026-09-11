@@ -5950,9 +5950,14 @@ function renderImagePreview(){
 }
 
 
-function removeProductImage(
+async function removeProductImage(
     index
 ){
+
+    const removed =
+        editingImages[index];
+
+    if(!removed)return;
 
     editingImages =
         editingImages.filter(
@@ -5961,6 +5966,69 @@ function removeProductImage(
         );
 
     renderImagePreview();
+
+    /* حذف الملف من GitHub/Cloudinary فوراً */
+    try{
+
+        await deleteCloudinaryImage(
+            removed
+        );
+
+    }catch(error){
+
+        console.warn(
+            "تعذر حذف الصورة من التخزين",
+            error
+        );
+    }
+
+    /* تحديث سجل المنتج في قاعدة البيانات فوراً
+       (إن كان المنتج محفوظاً مسبقاً) */
+    const idBox =
+        document.getElementById(
+            "productId"
+        );
+
+    if(
+        idBox &&
+        idBox.value &&
+        requireStore()
+    ){
+
+        try{
+
+            await supabaseRequest(
+                "products",
+                {
+                    method:"PATCH",
+
+                    query:
+                    "?id=eq." +
+                    encodeURIComponent(
+                        idBox.value
+                    ) +
+                    "&store_id=eq." +
+                    encodeURIComponent(
+                        store.id
+                    ),
+
+                    body:{
+                        images:
+                            editingImages
+                    }
+                }
+            );
+
+        }catch(error){
+
+            console.warn(
+                "تعذر تحديث صور المنتج",
+                error
+            );
+        }
+    }
+
+    toast("تم حذف الصورة ✓");
 }
 
 
