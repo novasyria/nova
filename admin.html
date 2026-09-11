@@ -2997,6 +2997,16 @@ const CLOUDINARY_UPLOAD_PRESET =
     "novamarket";
 
 
+/* =========================================================
+   SUPABASE EDGE FUNCTION (nova-media) — رفع الصور بلا حدود
+   التوكن (الرفع إلى GitHub) محفوظ عند Supabase، ليس في الكود
+   ========================================================= */
+
+const NOVA_MEDIA_FUNCTION =
+    SUPABASE_URL +
+    "/functions/v1/nova-media";
+
+
 async function resizeImageToBlob(
     file,
     maxSize = 1200,
@@ -3101,7 +3111,7 @@ async function resizeImageToBlob(
 }
 
 
-async function uploadToCloudinary(
+async function uploadImage(
     file,
     folder = "store",
     maxSize = 1200,
@@ -3115,6 +3125,68 @@ async function uploadToCloudinary(
             quality
         );
 
+    /* الخطة الأولى: رفع عبر Edge Function عند Supabase (jsDelivr) */
+    try{
+
+        const dataUrl =
+            await base64(blob);
+
+        const base64Content =
+            dataUrl.split(",")[1];
+
+        const response =
+            await fetch(
+                NOVA_MEDIA_FUNCTION,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        apikey:
+                            SUPABASE_KEY,
+                        Authorization:
+                            "Bearer " +
+                            SUPABASE_KEY
+                    },
+
+                    body: JSON.stringify({
+                        action: "upload",
+                        folder,
+                        ext: "webp",
+                        content:
+                            base64Content
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if(
+            response.ok &&
+            data.url
+        )
+            return data.url;
+
+        throw new Error(
+            "نوفا-ميديا فشل الرفع: " +
+            (
+                data?.error ||
+                response.status
+            )
+        );
+
+    }catch(error){
+
+        console.warn(
+            "الرفع عبر nova-media فشل — نرجع لاحتياط Cloudinary",
+            error
+        );
+    }
+
+
+    /* الخطة الثانية: الاحتياط — Cloudinary */
     const formData =
         new FormData();
 
@@ -3174,9 +3246,55 @@ const EDGE_DELETE_URL =
 
 async function deleteCloudinaryImage(url){
 
+    if(!url) return;
+
+    const urlStr =
+        String(url);
+
+    /* صورة GitHub (jsDelivr) — حذف عبر Edge Function */
     if(
-        !url ||
-        !String(url).startsWith(
+        urlStr.startsWith(
+            "https://cdn.jsdelivr.net/gh/"
+        )
+    ){
+
+        try{
+
+            await fetch(
+                NOVA_MEDIA_FUNCTION,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        apikey:
+                            SUPABASE_KEY,
+                        Authorization:
+                            "Bearer " +
+                            SUPABASE_KEY
+                    },
+
+                    body: JSON.stringify({
+                        action: "delete",
+                        url: urlStr
+                    })
+                }
+            );
+
+        }catch(error){
+
+            console.warn(
+                "تعذر حذف الصورة من GitHub",
+                error
+            );
+        }
+
+        return;
+    }
+
+    if(
+        !urlStr.startsWith(
             "https://res.cloudinary.com/"
         )
     )
@@ -3856,7 +3974,7 @@ if(logoFile){
                 );
 
                 data.settings.logo =
-                    await uploadToCloudinary(
+                    await uploadImage(
                         file,
                         "logos",
                         400,
@@ -4327,7 +4445,7 @@ async function saveBanner(btn){
             );
 
             image =
-                await uploadToCloudinary(
+                await uploadImage(
                     file,
                     "banners",
                     1200,
@@ -4602,7 +4720,7 @@ async function saveCategory(btn){
 
             if(file)
                 image =
-                    await uploadToCloudinary(
+                    await uploadImage(
                         file,
                         "categories",
                         300,
@@ -4647,7 +4765,7 @@ async function saveCategory(btn){
 
 
             const image =
-                await uploadToCloudinary(
+                await uploadImage(
                     file,
                     "categories",
                     300,
@@ -5908,7 +6026,7 @@ if(pFiles){
                     await Promise.all(
                         filesToUpload.map(
                             file =>
-                                uploadToCloudinary(
+                                uploadImage(
                                     file,
                                     "products",
                                     900,

@@ -1534,6 +1534,16 @@ const CLOUDINARY_UPLOAD_PRESET =
     "novamarket";
 
 
+/* =========================================================
+   SUPABASE EDGE FUNCTION (nova-media) — رفع الصور بلا حدود
+   التوكن محفوظ عند Supabase، ليس في الكود
+   ========================================================= */
+
+const NOVA_MEDIA_FUNCTION =
+    SUPABASE_URL +
+    "/functions/v1/nova-media";
+
+
 async function resizeImageToBlob(
     file,
     maxSize = 1200,
@@ -1632,7 +1642,7 @@ async function resizeImageToBlob(
 }
 
 
-async function uploadToCloudinary(
+async function uploadImage(
     file,
     folder = "store",
     maxSize = 1200,
@@ -1646,6 +1656,68 @@ async function uploadToCloudinary(
             quality
         );
 
+    /* الخطة الأولى: رفع عبر Edge Function عند Supabase (jsDelivr) */
+    try{
+
+        const dataUrl =
+            await base64(blob);
+
+        const base64Content =
+            dataUrl.split(",")[1];
+
+        const response =
+            await fetch(
+                NOVA_MEDIA_FUNCTION,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        apikey:
+                            SUPABASE_KEY,
+                        Authorization:
+                            "Bearer " +
+                            SUPABASE_KEY
+                    },
+
+                    body: JSON.stringify({
+                        action: "upload",
+                        content:
+                            base64Content,
+                        folder,
+                        ext: "jpg"
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if(
+            response.ok &&
+            data.url
+        )
+            return data.url;
+
+        throw new Error(
+            "نوفا-ميديا فشل الرفع: " +
+            (
+                data?.error ||
+                response.status
+            )
+        );
+
+    }catch(error){
+
+        console.warn(
+            "الرفع عبر nova-media فشل — نرجع لاحتياط Cloudinary",
+            error
+        );
+    }
+
+
+    /* الخطة الثانية: الاحتياط — Cloudinary */
     const formData =
         new FormData();
 
@@ -2327,7 +2399,7 @@ if(logoFile){
             try{
 
                 data.settings.logo =
-                    await uploadToCloudinary(
+                    await uploadImage(
                         file,
                         "logos",
                         400,
@@ -2733,7 +2805,7 @@ async function saveBanner(){
         if(file){
 
             image =
-                await uploadToCloudinary(
+                await uploadImage(
                     file,
                     "banners",
                     1200,
@@ -2998,7 +3070,7 @@ async function saveCategory(){
 
             if(file)
                 image =
-                    await uploadToCloudinary(
+                    await uploadImage(
                         file,
                         "categories",
                         300,
@@ -3041,7 +3113,7 @@ async function saveCategory(){
 
 
             const image =
-                await uploadToCloudinary(
+                await uploadImage(
                     file,
                     "categories",
                     300,
@@ -4203,7 +4275,7 @@ if(pFiles){
                     await Promise.all(
                         files.map(
                             file =>
-                                uploadToCloudinary(
+                                uploadImage(
                                     file,
                                     "products",
                                     900,
