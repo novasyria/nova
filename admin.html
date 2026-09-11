@@ -6082,12 +6082,12 @@ if(pFiles){
 
 
             const remainingSlots =
-                5 - editingImages.length;
+                3 - editingImages.length;
 
             if(remainingSlots <= 0){
 
                 toast(
-                    "الحد الأقصى 5 صور للمنتج"
+                    "الحد الأقصى 3 صور للمنتج"
                 );
 
                 this.value = "";
@@ -6105,7 +6105,7 @@ if(pFiles){
             if(files.length > remainingSlots){
 
                 toast(
-                    "بيسمح بحد أقصى 5 صور للمنتج، رح نرفع " +
+                    "بيسمح بحد أقصى 3 صور للمنتج، رح نرفع " +
                     remainingSlots +
                     " بس"
                 );
