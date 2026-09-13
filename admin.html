@@ -5737,16 +5737,6 @@ function renderProductPageSections(
 
 function productModal(){
 
-    if(data.products.length >= 100){
-
-        toast(
-            "وصلت للحد الأقصى (100 منتج) لهذا المتجر"
-        );
-
-        return;
-    }
-
-
     editingImages = [];
 
 
@@ -6309,21 +6299,6 @@ async function saveProduct(btn){
             document.getElementById(
                 "productId"
             ).value;
-
-
-        if(
-            !id &&
-            data.products.length >= 100
-        ){
-
-            restoreButton(btn);
-
-            toast(
-                "وصلت للحد الأقصى (100 منتج) لهذا المتجر"
-            );
-
-            return;
-        }
 
 
         const name =
