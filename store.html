@@ -135,6 +135,85 @@ border-radius:11px;
 font-weight:bold
 }
 
+.bannerCarousel{
+position:relative;
+height:340px;
+border-radius:24px;
+overflow:hidden;
+margin-bottom:20px;
+box-shadow:0 12px 35px #0002
+}
+
+.bannerSlide{
+position:absolute;
+inset:0;
+opacity:0;
+visibility:hidden;
+transition:opacity .7s ease,visibility .7s ease;
+cursor:pointer
+}
+
+.bannerSlide.active{
+opacity:1;
+visibility:visible
+}
+
+.bannerSlide img{
+width:100%;
+height:100%;
+object-fit:cover
+}
+
+.bannerDots{
+position:absolute;
+bottom:14px;
+left:0;
+right:0;
+display:flex;
+justify-content:center;
+gap:8px;
+z-index:5
+}
+
+.bannerDots button{
+width:9px;
+height:9px;
+border-radius:50%;
+background:#ffffffb3;
+border:0;
+cursor:pointer;
+transition:all .3s;
+padding:0
+}
+
+.bannerDots button.active{
+background:var(--btn);
+width:24px;
+border-radius:6px
+}
+
+.bannerArrow{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+z-index:6;
+background:#ffffff33;
+color:#fff;
+border:0;
+width:38px;
+height:38px;
+border-radius:50%;
+font-size:16px;
+cursor:pointer;
+backdrop-filter:blur(4px);
+transition:background .3s
+}
+
+.bannerArrow:hover{background:#ffffff66}
+
+.bannerArrow.prev{right:12px}
+.bannerArrow.next{left:12px}
+
 .search{
 position:relative;
 margin-bottom:25px
@@ -431,6 +510,54 @@ cursor:pointer
 
 .thumb.active{
 border-color:var(--btn)
+}
+
+.galleryWrap{
+position:relative;
+border-radius:17px;
+overflow:hidden
+}
+
+.galleryWrap .mainImage{
+width:100%;
+height:520px;
+object-fit:cover;
+border-radius:17px;
+display:block
+}
+
+.galleryNav{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+z-index:7;
+background:#ffffff33;
+color:#fff;
+border:0;
+width:40px;
+height:40px;
+border-radius:50%;
+font-size:17px;
+cursor:pointer;
+backdrop-filter:blur(4px);
+transition:background .3s
+}
+
+.galleryNav:hover{background:#ffffff66}
+
+.galleryNav.prev{right:10px}
+.galleryNav.next{left:10px}
+
+.galleryCounter{
+position:absolute;
+top:12px;
+left:12px;
+z-index:7;
+background:#0008;
+color:#fff;
+font-size:12px;
+padding:5px 10px;
+border-radius:20px
 }
 
 .details h1{
@@ -1026,7 +1153,7 @@ margin:20px auto
 
 <main class="container" id="home">
 
-<div class="banner" id="topBanner">
+<div class="bannerCarousel" id="topBanner">
 <div id="bannerContent"></div>
 </div>
 
@@ -1074,7 +1201,23 @@ onclick="closeProduct()"
 
 <div>
 
+<div class="galleryWrap">
+
 <img id="mainImage" class="mainImage">
+
+<button
+class="galleryNav prev"
+onclick="galleryStep(-1)"
+>❯</button>
+
+<button
+class="galleryNav next"
+onclick="galleryStep(1)"
+>❮</button>
+
+<span class="galleryCounter" id="galleryCounter"></span>
+
+</div>
 
 <div id="thumbs" class="thumbs"></div>
 
@@ -1780,6 +1923,12 @@ const bannerContentEl =
         "bannerContent"
     );
 
+let bannerBannerIndex = 0;
+
+let bannerTimer = null;
+
+let galleryIndex = 0;
+
 const productPageEl =
     document.getElementById(
         "productPage"
@@ -2408,12 +2557,19 @@ async function loadStore(){
             );
 
 
+        const sectionIds =
+            (sections || []).map(
+                s => String(s.id)
+            );
+
+
         /* =================================================
            7 - PAGE SECTION PRODUCTS
         ================================================= */
 
         const sectionProducts =
-            await supabaseRequest(
+            sectionIds.length
+            ? await supabaseRequest(
 
                 "page_section_products",
 
@@ -2421,11 +2577,19 @@ async function loadStore(){
 
                     query:
                         "?select=*" +
+
+                        "&section_id=in.(" +
+                        encodeURIComponent(
+                            sectionIds.join(",")
+                        ) +
+                        ")" +
+
                         "&order=position.asc"
 
                 }
 
-            );
+            )
+            : [];
 
 
         data.pageSections =
@@ -2840,11 +3004,10 @@ async function init(){
 
 function renderBanner(){
 
-    const b =
-        data.banners[0];
+    const banners =
+        (data.banners || []);
 
-
-    if(!b){
+    if(banners.length === 0){
 
         document.getElementById(
             "topBanner"
@@ -2855,42 +3018,149 @@ function renderBanner(){
 
     }
 
-
     document.getElementById(
         "topBanner"
     ).style.display =
         "block";
 
+    bannerBannerIndex = 0;
 
-    bannerContentEl.innerHTML = `
+    bannerTimer && clearInterval(bannerTimer);
 
-        <img
-            src="${safeImgSrc(
-                b.image || ""
-            )}"
-        >
+    bannerContentEl.innerHTML = banners.map((b,index) => `
 
-        <div class="overlay">
+        <div class="bannerSlide ${
+            index === 0 ? "active" : ""
+        }" onclick="bannerGo(${index})">
 
-            <div>
+            <img
+                src="${safeImgSrc(
+                    b.image || ""
+                )}"
+            >
 
-                <h1>
-                    ${esc(
-                        b.title || ""
-                    )}
-                </h1>
+            <div class="overlay">
 
-                <p>
-                    ${esc(
-                        b.text || ""
-                    )}
-                </p>
+                <div>
+
+                    <h1>
+                        ${esc(
+                            b.title || ""
+                        )}
+                    </h1>
+
+                    <p>
+                        ${esc(
+                            b.text || ""
+                        )}
+                    </p>
+
+                    ${
+                        b.link
+                        ? `
+                            <button
+                                class="bannerBtn"
+                                onclick="event.stopPropagation();bannerAction('${esc(b.link)}')"
+                            >${esc(b.button || "تسوق الآن")}</button>
+                        `
+                        : ""
+                    }
+
+                </div>
 
             </div>
 
         </div>
 
+    `).join("") + `
+
+        <div class="bannerDots">${
+            banners.map((b,index) => `
+                <button
+                    class="${index === 0 ? "active" : ""}"
+                    onclick="event.stopPropagation();bannerGo(${index})"
+                ></button>
+            `).join("")
+        }</div>
+
+        ${
+            banners.length > 1
+            ? `
+            <button
+                class="bannerArrow prev"
+                onclick="event.stopPropagation();bannerStep(-1)"
+            >❯</button>
+
+            <button
+                class="bannerArrow next"
+                onclick="event.stopPropagation();bannerStep(1)"
+            >❮</button>
+            `
+            : ""
+        }
     `;
+
+    if(banners.length > 1){
+
+        bannerTimer = setInterval(
+            () => bannerStep(1),
+            5000
+        );
+
+    }
+
+}
+
+
+function bannerGo(index){
+
+    const slides =
+        document.querySelectorAll(
+            "#bannerContent .bannerSlide"
+        );
+
+    const dots =
+        document.querySelectorAll(
+            "#bannerContent .bannerDots button"
+        );
+
+    if(slides.length === 0)
+        return;
+
+    bannerBannerIndex =
+        (index + slides.length) %
+        slides.length;
+
+    slides.forEach((s,i) => {
+        s.classList.toggle(
+            "active",
+            i === bannerBannerIndex
+        );
+    });
+
+    dots.forEach((d,i) => {
+        d.classList.toggle(
+            "active",
+            i === bannerBannerIndex
+        );
+    });
+
+}
+
+
+function bannerStep(dir){
+
+    const slides =
+        document.querySelectorAll(
+            "#bannerContent .bannerSlide"
+        );
+
+    if(slides.length === 0)
+        return;
+
+    bannerGo(
+        bannerBannerIndex + dir
+    );
 
 }
 
@@ -3848,11 +4118,17 @@ function openProduct(id){
             "mainImage"
         );
 
+    galleryIndex = 0;
+
+    const imgList =
+        (current.images || []);
 
     mainImage.src =
         safeImgSrc(
-            current.images?.[0]
+            imgList[0]
         );
+
+    updateGalleryCounter(imgList.length);
 
 
     const thumbs =
@@ -3863,7 +4139,7 @@ function openProduct(id){
 
     thumbs.innerHTML =
 
-        (current.images || [])
+        imgList
 
         .map(
 
@@ -3877,6 +4153,8 @@ function openProduct(id){
                     }"
                     src="${safeImgSrc(image)}"
                     onclick='document.getElementById("mainImage").src=${jsStr(image)};
+                        galleryIndex=${index};
+                        updateGalleryCounter(${imgList.length});
                         document
                         .querySelectorAll(".thumb")
                         .forEach(
@@ -3972,6 +4250,63 @@ function closeProduct(){
 
     document.body.style.overflow =
         "";
+
+}
+
+
+function updateGalleryCounter(total){
+
+    const counter =
+        document.getElementById(
+            "galleryCounter"
+        );
+
+    if(!counter)
+        return;
+
+    counter.textContent =
+        (galleryIndex + 1) +
+        " / " +
+        Math.max(total, 1);
+
+}
+
+
+function galleryStep(dir){
+
+    if(!current)
+        return;
+
+    const imgList =
+        (current.images || []);
+
+    if(imgList.length === 0)
+        return;
+
+    const mainImage =
+        document.getElementById(
+            "mainImage"
+        );
+
+    galleryIndex =
+        (galleryIndex + dir + imgList.length) %
+        imgList.length;
+
+    mainImage.src =
+        safeImgSrc(
+            imgList[galleryIndex]
+        );
+
+    document
+        .querySelectorAll(".thumb")
+        .forEach((x,index) => {
+            x.classList.toggle(
+                "active",
+                index === galleryIndex
+            );
+        });
+
+    updateGalleryCounter(imgList.length);
 
 }
 
@@ -5593,6 +5928,64 @@ async function confirmOrder(){
 
 
         /* =================================================
+           التحقق من المخزون قبل إرسال الطلب
+        ================================================= */
+
+        const stockIssue =
+            cart
+
+            .map(item => {
+                const product =
+                    data.products.find(
+                        p =>
+                            String(p.id) ===
+                            String(item.productId)
+                    );
+
+                return {
+                    item,
+                    product
+                };
+            })
+            .find(
+                ({ item, product }) => {
+
+                    if(!product)
+                        return true;
+
+                    const wanted =
+                        Number(item.qty || 0);
+
+                    const available =
+                        Number(
+                            product.stock ?? 999999
+                        );
+
+                    return (
+                        available >= 0 &&
+                        wanted > available
+                    );
+
+                }
+            );
+
+        if(stockIssue){
+
+            const pName =
+                stockIssue.product?.name ||
+                "منتج";
+
+            throw new Error(
+                "عذراً، الكمية المطلوبة من \"" +
+                pName +
+                "\" غير متوفرة حالياً.\n" +
+                "يرجى التقليل من الكمية أو إزالة المنتج من السلة."
+            );
+
+        }
+
+
+        /* =================================================
            حساب الإجمالي
         ================================================= */
 
@@ -5871,6 +6264,11 @@ async function confirmOrder(){
 
         document.getElementById(
             "customerNotes"
+        ).value = "";
+
+
+        document.getElementById(
+            "customerPayment"
         ).value = "";
 
 
