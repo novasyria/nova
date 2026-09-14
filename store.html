@@ -2353,321 +2353,218 @@ async function loadStore(){
         }
 
 
-        /* =================================================
-           3 - BANNERS
-        ================================================= */
-
-        data.banners =
-            await supabaseRequest(
-
-                "banners",
-
-                {
-
-                    query:
-                        "?select=*" +
-
-                        "&store_id=eq." +
-
-                        encodeURIComponent(
-                            storeId
-                        ) +
-
-                        "&active=eq.true" +
-
-                        "&order=position.asc"
-
-                }
-
-            );
-
-
-        /* =================================================
-           4 - CATEGORIES
-        ================================================= */
-
-        data.categories =
-            await supabaseRequest(
-
-                "categories",
-
-                {
-
-                    query:
-                        "?select=*" +
-
-                        "&store_id=eq." +
-
-                        encodeURIComponent(
-                            storeId
-                        ) +
-
-                        "&active=eq.true" +
-
-                        "&order=position.asc"
-
-                }
-
-            );
-
-
-        /* =================================================
-           5 - PRODUCTS
-        ================================================= */
-
-        const products =
-            await supabaseRequest(
-
-                "products",
-
-                {
-
-                    query:
-                        "?select=*" +
-
-                        "&store_id=eq." +
-
-                        encodeURIComponent(
-                            storeId
-                        ) +
-
-                        "&active=eq.true" +
-
-                        "&order=created_at.desc"
-
-                }
-
-            );
-
-
-        data.products =
-
-            (products || [])
-
-            .map(
-                normalizeProduct
-            )
-
-            .filter(Boolean);
-
-
-        /* =================================================
-           6 - PAGE SECTIONS
-        ================================================= */
-
-        const sections =
-            await supabaseRequest(
-
-                "page_sections",
-
-                {
-
-                    query:
-                        "?select=*" +
-
-                        "&store_id=eq." +
-
-                        encodeURIComponent(
-                            storeId
-                        ) +
-
-                        "&active=eq.true" +
-
-                        "&order=position.asc"
-
-                }
-
-            );
-
-
-        const sectionIds =
-            (sections || []).map(
-                s => String(s.id)
-            );
-
-
-        /* =================================================
-           7 - PAGE SECTION PRODUCTS
-        ================================================= */
-
-        const sectionProducts =
-            sectionIds.length
-            ? await supabaseRequest(
-
-                "page_section_products",
-
-                {
-
-                    query:
-                        "?select=*" +
-
-                        "&section_id=in.(" +
-                        encodeURIComponent(
-                            sectionIds.join(",")
-                        ) +
-                        ")" +
-
-                        "&order=position.asc"
-
-                }
-
-            )
-            : [];
-
-
-        data.pageSections =
-
-            (sections || [])
-
-            .map(
-
-                section => {
-
-                    const links =
-
-                        (sectionProducts || [])
-
-                        .filter(
-
-                            x =>
-
-                                String(
-                                    x.section_id
-                                ) ===
-
-                                String(
-                                    section.id
-                                )
-
+/* =================================================
+   3-6 — BANNERS + CATEGORIES + PRODUCTS + SECTIONS
+   كلها متوازية (تعتمد فقط على storeId)
+================================================= */
+
+const [banners, categories, products, sections] =
+    await Promise.all([
+
+        supabaseRequest("banners",{
+            query:
+                "?select=*" +
+                "&store_id=eq." + encodeURIComponent(storeId) +
+                "&active=eq.true" +
+                "&order=position.asc"
+        }),
+
+        supabaseRequest("categories",{
+            query:
+                "?select=*" +
+                "&store_id=eq." + encodeURIComponent(storeId) +
+                "&active=eq.true" +
+                "&order=position.asc"
+        }),
+
+        supabaseRequest("products",{
+            query:
+                "?select=*" +
+                "&store_id=eq." + encodeURIComponent(storeId) +
+                "&active=eq.true" +
+                "&order=created_at.desc"
+        }),
+
+        supabaseRequest("page_sections",{
+            query:
+                "?select=*" +
+                "&store_id=eq." + encodeURIComponent(storeId) +
+                "&active=eq.true" +
+                "&order=position.asc"
+        })
+
+    ]);
+
+data.banners   = banners   || [];
+data.categories = categories || [];
+
+data.products  =
+    (products || [])
+    .map(normalizeProduct)
+    .filter(Boolean);
+
+
+/* =================================================
+   7 — SECTION PRODUCTS
+   يعتمد على IDs الأقسام (يتطلب sections أولاً)
+================================================= */
+
+const sectionIds =
+    (sections || []).map(s => String(s.id));
+
+const sectionProducts =
+    sectionIds.length
+    ? await supabaseRequest(
+          "page_section_products",
+          {
+              query:
+                  "?select=*" +
+                  "&section_id=in.(" +
+                  encodeURIComponent(sectionIds.join(",")) +
+                  ")" +
+                  "&order=position.asc"
+          }
+      )
+    : [];
+
+data.pageSections =
+    (sections || [])
+
+    .map(
+
+        section => {
+
+            const links =
+
+                (sectionProducts || [])
+
+                .filter(
+
+                    x =>
+
+                        String(
+                            x.section_id
+                        ) ===
+
+                        String(
+                            section.id
                         )
 
-                        .sort(
+                )
 
-                            (a,b) =>
+                .sort(
 
-                                Number(
-                                    a.position || 0
-                                )
+                    (a,b) =>
 
-                                -
+                        Number(
+                            a.position || 0
+                        )
 
-                                Number(
-                                    b.position || 0
-                                )
+                        -
 
-                        );
+                        Number(
+                            b.position || 0
+                        )
 
+                );
 
-                    const ids =
+            const ids =
 
-                        links.map(
+                links.map(
 
-                            x =>
-                                String(
-                                    x.product_id
-                                )
+                    x =>
+                        String(
+                            x.product_id
+                        )
 
-                        );
+                );
 
+            return {
 
-                    return {
+                id:
+                    String(
+                        section.id
+                    ),
 
-                        id:
-                            String(
-                                section.id
-                            ),
+                title:
+                    section.title ||
+                    "",
 
-                        title:
-                            section.title ||
-                            "",
+                subtitle:
+                    section.subtitle ||
+                    "",
 
-                        subtitle:
-                            section.subtitle ||
-                            "",
+                icon:
+                    section.icon ||
+                    "✨",
 
-                        icon:
-                            section.icon ||
-                            "✨",
-
-                        position:
-                            Number(
-                                section.position || 0
-                            ),
-
-                        products:
-
-                            data.products.filter(
-
-                                p =>
-
-                                    ids.includes(
-                                        String(
-                                            p.id
-                                        )
-                                    )
-
-                            )
-
-                    };
-
-                }
-
-            )
-
-            .filter(
-
-                section =>
-
-                    section.products.length
-
-            );
-
-
-        console.log(
-            "NOVA STORE LOADED:",
-            {
-                storeId:
-                    STORE_ID,
-
-                store:
-                    data.store,
+                position:
+                    Number(
+                        section.position || 0
+                    ),
 
                 products:
-                    data.products.length,
 
-                categories:
-                    data.categories.length
+                    data.products.filter(
 
-            }
-        );
+                        p =>
 
+                            ids.includes(
+                                String(
+                                    p.id
+                                )
+                            )
 
-        /* =================================================
-           VISIT COUNTER
-           سجّل زيارة تلقائياً كل مرة يفتح الزائر المتجر
-        ================================================= */
+                    )
 
-        try{
-
-            await supabaseRequest(
-                "store_visits",
-                {
-                    method: "POST",
-                    prefer: "return=minimal",
-                    body: {
-                        store_id: STORE_ID
-                    }
-                }
-            );
-
-        }catch(visitError){
-
-            console.error(
-                "Visit log failed:",
-                visitError
-            );
+            };
 
         }
+
+    )
+
+    .filter(
+
+        section =>
+
+            section.products.length
+
+    );
+
+
+console.log(
+    "NOVA STORE LOADED:",
+    {
+        storeId:
+            STORE_ID,
+
+        store:
+            data.store,
+
+        products:
+            data.products.length,
+
+        categories:
+            data.categories.length
+
+    }
+);
+
+
+/* =================================================
+   VISIT COUNTER — خلفية فقط، لا يُنتظر
+================================================= */
+
+supabaseRequest(
+    "store_visits",
+    {
+        method: "POST",
+        prefer: "return=minimal",
+        body: {
+            store_id: STORE_ID
+        }
+    }
+)["catch"](() => {});
 
 
     }catch(error){
