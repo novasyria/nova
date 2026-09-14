@@ -5833,6 +5833,88 @@ async function confirmOrder(){
 
 
         /* =================================================
+           خصم المخزون بعد نجاح الطلب
+           نعالج كل منتج مطلوب لنقص الكمية المتوفرة
+        ================================================= */
+
+        const demanded =
+            {};
+
+        orderItems.forEach(
+            item => {
+
+                const productId =
+                    String(
+                        item.productId
+                    );
+
+                demanded[productId] =
+                    (demanded[productId] || 0) +
+                    Number(
+                        item.quantity || 0
+                    );
+            }
+        );
+
+        await Promise.all(
+
+            Object.keys(
+                demanded
+            )
+
+            .map(
+
+                productId => {
+
+                    const product =
+                        data.products.find(
+                            p =>
+                                String(p.id) ===
+                                productId
+                        );
+
+                    const newStock =
+
+                        Math.max(
+                            0,
+                            Number(
+                                product?.stock ?? 0
+                            )
+
+                            -
+
+                            Number(
+                                demanded[productId] || 0
+                            )
+                        );
+
+                    return supabaseRequest(
+                        "products",
+                        {
+                            method:
+                                "PATCH",
+                            query:
+                                "?id=eq." +
+                                encodeURIComponent(productId) +
+                                "&store_id=eq." +
+                                encodeURIComponent(data.store.id),
+                            prefer:
+                                "return=minimal",
+                            body:{
+                                stock:
+                                    newStock
+                            }
+                        }
+                    );
+
+                }
+
+            )
+
+        );
+
+
+        /* =================================================
            LOCAL ORDER
         ================================================= */
 
