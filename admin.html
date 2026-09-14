@@ -266,6 +266,25 @@ font-size:13px;
 font-weight:bold
 }
 
+.formGrid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px
+}
+
+.formGroup{
+display:flex;
+flex-direction:column;
+gap:7px
+}
+
+.formGroup.full{grid-column:1/-1}
+
+.formGroup label{
+font-size:13px;
+font-weight:bold
+}
+
 input,textarea,select{
 border:1px solid #dddde5;
 background:#fafafd;
@@ -2839,6 +2858,15 @@ function esc(x){
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")
         .replaceAll('"',"&quot;");
+}
+
+
+function jsStr(v){
+
+    return JSON.stringify(String(v ?? ""))
+        .slice(1,-1)
+        .replaceAll("\\","\\\\")
+        .replaceAll("'","\\u0027");
 }
 
 
@@ -8133,6 +8161,20 @@ async function deleteOrder(id){
     try{
 
         await supabaseRequest(
+            "order_items",
+            {
+                method:"DELETE",
+
+                query:
+                "?order_id=eq." +
+                encodeURIComponent(
+                    id
+                )
+            }
+        );
+
+
+        await supabaseRequest(
             "orders",
             {
                 method:"DELETE",
@@ -8360,7 +8402,7 @@ async function renderCustomers(){
             (o.customer?.phone || "")
             .trim();
 
-        if(!phone)
+        if(!phone || phone === "—")
             return;
 
         if(!phoneMap[phone]){
@@ -8512,7 +8554,7 @@ function filterCustomers(){
                     <td style="color:#168a4a">${formatMoney(c.totalPaid)}</td>
                     <td style="color:${statusColor};font-weight:bold">${formatMoney(remaining)}</td>
                     <td>
-                        <button class="secondary" onclick="viewCustomerDetails('${esc(c.phone)}')" style="margin:2px;font-size:12px">
+                        <button class="secondary" onclick="viewCustomerDetails('${jsStr(c.phone)}')" style="margin:2px;font-size:12px">
                             📋 تفاصيل
                         </button>
                     </td>
@@ -8634,7 +8676,7 @@ async function viewCustomerDetails(phone){
             </div>
         </div>
 
-        <button class="primary" onclick="openPaymentModal('${esc(c.name)}','${esc(c.phone)}')" style="margin-bottom:20px">
+        <button class="primary" onclick="openPaymentModal('${jsStr(c.name)}','${jsStr(c.phone)}')" style="margin-bottom:20px">
             💰 تسجيل دفعة
         </button>
 
@@ -8701,7 +8743,7 @@ async function submitPayment(){
         return;
     }
 
-    if(!amount || amount <= 0){
+    if(!amount || !isFinite(amount) || amount <= 0){
         alert("يرجى إدخال مبلغ صحيح أكبر من صفر");
         return;
     }
@@ -9805,6 +9847,14 @@ setInterval(
             await renderInvoices();
 
             await update();
+
+
+            if(
+                document.getElementById("customers")?.classList.contains("active")
+            ){
+
+                await renderCustomers();
+            }
 
 
         }catch(error){

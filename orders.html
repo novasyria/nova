@@ -6125,6 +6125,20 @@ async function deleteOrder(id){
     try{
 
         await supabaseRequest(
+            "order_items",
+            {
+                method:"DELETE",
+
+                query:
+                "?order_id=eq." +
+                encodeURIComponent(
+                    id
+                )
+            }
+        );
+
+
+        await supabaseRequest(
             "orders",
             {
                 method:"DELETE",
