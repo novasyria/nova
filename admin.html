@@ -1298,10 +1298,6 @@ display:none
 <span id="newOrderBadge"></span>
 </button>
 
-<button onclick="page('invoices',this)">
-🧾 الفواتير
-</button>
-
 <button onclick="page('customers',this)">
 👥 الزبائن
 </button>
@@ -2141,51 +2137,6 @@ oninput="renderOrders()"
 </thead>
 
 <tbody id="orderList"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</section>
-
-<!-- ================= INVOICES ================= -->
-
-<section id="invoices" class="page">
-
-<div class="card">
-
-<div class="head">
-
-<h2>الفواتير</h2>
-
-<button class="secondary" onclick="renderInvoices()">
-↻ تحديث
-</button>
-
-</div>
-
-<div class="table">
-
-<table>
-
-<thead>
-
-<tr>
-<th>رقم الفاتورة</th>
-<th>رقم الطلب</th>
-<th>العميل</th>
-<th>المجموع</th>
-<th>طريقة الدفع</th>
-<th>الحالة</th>
-<th>التاريخ</th>
-<th>إدارة</th>
-</tr>
-
-</thead>
-
-<tbody id="invoiceList"></tbody>
 
 </table>
 
@@ -7730,8 +7681,6 @@ async function changeOrderStatus(
 
         await renderOrders();
 
-        await renderInvoices();
-
         await update();
 
 
@@ -8194,8 +8143,6 @@ async function deleteOrder(id){
 
         await renderOrders();
 
-        await renderInvoices();
-
         await update();
 
 
@@ -8211,175 +8158,6 @@ async function deleteOrder(id){
 }
 
 
-/* =========================================================
-   INVOICES
-   ========================================================= */
-
-async function renderInvoices(){
-
-    const orders =
-        await getOrders();
-
-
-    const body =
-        document.getElementById(
-            "invoiceList"
-        );
-
-
-    if(!body)return;
-
-
-    if(!orders.length){
-
-        body.innerHTML = `
-
-            <tr>
-
-                <td colspan="8">
-
-                    <div class="empty">
-
-                        <div class="emptyIcon">
-                            🧾
-                        </div>
-
-                        لا توجد فواتير حالياً
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-    }
-
-
-    body.innerHTML =
-        orders
-        .map(
-            o=>`
-
-            <tr>
-
-                <td>
-
-                    <b>
-                        INV-${esc(
-                            o.order_number
-                        )}
-                    </b>
-
-                </td>
-
-
-                <td>
-
-                    #${esc(
-                        o.order_number
-                    )}
-
-                </td>
-
-
-                <td>
-
-                    ${esc(
-                        o.customer.name
-                    )}
-
-                </td>
-
-
-                <td>
-
-                    <b>
-                        ${formatMoney(
-                            o.total
-                        )}
-                    </b>
-
-                </td>
-
-
-                <td>
-
-                    ${esc(
-                        o.payment
-                    )}
-
-                </td>
-
-
-                <td>
-
-                    <span
-                        class="
-                        status
-                        ${statusClass(
-                            o.status
-                        )}
-                        "
-                    >
-
-                        ${statusName(
-                            o.status
-                        )}
-
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    ${formatDate(
-                        o.date
-                    )}
-
-                </td>
-
-
-                <td>
-
-                    <div class="actions">
-
-                        <button
-                            class="action"
-                            onclick="
-                                showInvoice(
-                                    '${o.id}'
-                                )
-                            "
-                        >
-                            🧾 فتح
-                        </button>
-
-
-                        <button
-                            class="action edit"
-                            onclick="
-                                printInvoiceDirect(
-                                    '${o.id}'
-                                )
-                            "
-                        >
-                            🖨️ طباعة
-                        </button>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-            `
-        )
-        .join("");
-}
 
 
 /* =========================================================
@@ -8554,8 +8332,11 @@ function filterCustomers(){
                     <td style="color:#168a4a">${formatMoney(c.totalPaid)}</td>
                     <td style="color:${statusColor};font-weight:bold">${formatMoney(remaining)}</td>
                     <td>
-                        <button class="secondary" onclick="viewCustomerDetails('${jsStr(c.phone)}')" style="margin:2px;font-size:12px">
-                            📋 تفاصيل
+                        <button class="secondary" onclick="openPaymentModal('${jsStr(c.name)}','${jsStr(c.phone)}')" style="margin:2px;font-size:12px">
+                            💵 تسجيل دفعة
+                        </button>
+                        <button class="secondary" onclick="openCustomerInvoices('${jsStr(c.phone)}')" style="margin:2px;font-size:12px">
+                            🧾 الفواتير
                         </button>
                     </td>
                 </tr>
@@ -8567,7 +8348,7 @@ function filterCustomers(){
 }
 
 
-async function viewCustomerDetails(phone){
+async function openCustomerInvoices(phone){
 
     const c =
         customersCache.find(
@@ -8578,7 +8359,7 @@ async function viewCustomerDetails(phone){
         return;
 
     document.getElementById("customerModalTitle").textContent =
-        "📋 زبون: " + c.name +
+        "🧾 فواتير: " + c.name +
         " (" + c.phone + ")";
 
     let payRows = [];
@@ -8632,19 +8413,14 @@ async function viewCustomerDetails(phone){
                 ? "#168a4a"
                 : "#e67e22";
 
-            const itemsList =
-                (o.items || [])
-                .map(i => i.name + " × " + i.quantity)
-                .join(" | ");
-
             return `
-                <tr>
-                    <td>${formatDate(o.date)}</td>
-                    <td style="font-family:monospace">${esc(o.orderNumber || o.orderId || String(o.id).slice(0,8))}</td>
-                    <td style="font-weight:bold">${formatMoney(o.total)}</td>
-                    <td style="color:${statusColor}">${status}</td>
-                    <td style="font-size:12px;color:#666">${esc(itemsList)}</td>
-                </tr>
+                <div class="invCard" onclick="showInvoice('${o.id}')" style="cursor:pointer;border:1px solid #e4e4ec;border-radius:12px;padding:12px 15px;margin-bottom:10px;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;transition:box-shadow .15s">
+                    <div style="font-weight:bold">${esc(o.customer?.name || c.name)}</div>
+                    <div style="font-family:monospace">INV-${esc(o.order_number || o.orderId || String(o.id).slice(0,8))}</div>
+                    <div style="color:#888;font-size:13px">${formatDate(o.date)}</div>
+                    <div style="font-weight:bold">${formatMoney(o.total)}</div>
+                    <span class="status ${statusClass(o.status)}" style="font-size:11px">${status}</span>
+                </div>
             `;
 
         })
@@ -8652,11 +8428,11 @@ async function viewCustomerDetails(phone){
 
     const paysHtml =
         (payRows || []).map(p => `
-            <tr>
-                <td>${formatDate(p.created_at)}</td>
-                <td style="font-weight:bold;color:#168a4a">${formatMoney(p.amount)}</td>
-                <td>${esc(p.note || "")}</td>
-            </tr>
+            <div class="payCard" style="border:1px solid #e0f0e6;border-radius:12px;padding:10px 15px;margin-bottom:8px;background:#f6fcf8;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+                <span style="font-weight:bold;color:#168a4a">${formatMoney(p.amount)}</span>
+                <span style="color:#888;font-size:13px">${formatDate(p.created_at)}</span>
+                <span style="font-size:12px;color:#666">${esc(p.note || "")}</span>
+            </div>
         `).join("");
 
     document.getElementById("customerModalBody").innerHTML = `
@@ -8680,24 +8456,14 @@ async function viewCustomerDetails(phone){
             💰 تسجيل دفعة
         </button>
 
-        <h3 style="margin-bottom:10px">🛒 الطلبات (${c.orders.length})</h3>
-        <div class="table" style="max-height:250px;overflow-y:auto;margin-bottom:20px">
-            <table>
-                <thead>
-                    <tr><th>التاريخ</th><th>رقم الطلب</th><th>المبلغ</th><th>الحالة</th><th>المنتجات</th></tr>
-                </thead>
-                <tbody>${ordersHtml}</tbody>
-            </table>
+        <h3 style="margin-bottom:10px">🧾 الفواتير (${c.orders.length})</h3>
+        <div style="margin-bottom:25px">
+            ${ordersHtml || '<div style="text-align:center;color:#aaa;padding:20px">لا توجد فواتير</div>'}
         </div>
 
         <h3 style="margin-bottom:10px">💰 الدفعات (${(payRows || []).length})</h3>
-        <div class="table" style="max-height:180px;overflow-y:auto">
-            <table>
-                <thead>
-                    <tr><th>التاريخ</th><th>المبلغ</th><th>ملاحظة</th></tr>
-                </thead>
-                <tbody>${paysHtml || '<tr><td colspan="3" style="text-align:center;color:#aaa">لا توجد دفعات</td></tr>'}</tbody>
-            </table>
+        <div>
+            ${paysHtml || '<div style="text-align:center;color:#aaa;padding:20px">لا توجد دفعات</div>'}
         </div>
 
     `;
@@ -8806,13 +8572,66 @@ async function showInvoice(id){
 
     if(!order)return;
 
+    let payRows = [];
+
+    const phone =
+        (order.customer?.phone || "")
+        .trim();
+
+    if(phone && phone !== "—"){
+
+        try{
+
+            payRows =
+                await supabaseRequest(
+                    "payments",
+                    {
+                        query: "?select=*&store_id=eq." +
+                            encodeURIComponent(store.id) +
+                            "&customer_phone=eq." +
+                            encodeURIComponent(phone) +
+                            "&order=created_at.desc"
+                    }
+                );
+
+        }catch(e){
+
+            payRows = [];
+
+        }
+
+    }
+
+    const paysHtml =
+        (payRows || []).map(p => `
+            <tr>
+                <td>${formatDate(p.created_at)}</td>
+                <td style="font-weight:bold;color:#168a4a">${formatMoney(p.amount)}</td>
+                <td>${esc(p.note || "")}</td>
+            </tr>
+        `).join("");
 
     document.getElementById(
         "printArea"
     ).innerHTML =
         buildInvoice(
             order
-        );
+        ) +
+        (paysHtml ? `
+            <div style="margin-top:20px;border-top:2px dashed #ddd;padding-top:15px">
+                <h3 style="margin-bottom:10px">💰 دفعات الفاتورة</h3>
+                <table border="0" style="width:100%;border-collapse:collapse">
+                    <thead>
+                        <tr>
+                            <th style="text-align:right;padding:6px;border-bottom:1px solid #ddd">التاريخ</th>
+                            <th style="text-align:right;padding:6px;border-bottom:1px solid #ddd">المبلغ</th>
+                            <th style="text-align:right;padding:6px;border-bottom:1px solid #ddd">ملاحظة</th>
+                        </tr>
+                    </thead>
+                    <tbody>${paysHtml}</tbody>
+                </table>
+            </div>
+        ` : "");
 
 
     document.getElementById(
@@ -9613,9 +9432,6 @@ function page(
         orders:
             "الطلبات",
 
-        invoices:
-            "الفواتير",
-
         customers:
             "الزبائن"
     };
@@ -9648,10 +9464,6 @@ function page(
 
     if(id === "orders")
         renderOrders();
-
-
-    if(id === "invoices")
-        renderInvoices();
 
 
     if(id === "customers")
@@ -9787,8 +9599,6 @@ async function init(){
 
         await renderOrders();
 
-        await renderInvoices();
-
         await update();
 
 
@@ -9842,11 +9652,9 @@ setInterval(
 
             renderProductPageSections();
 
-            await renderOrders();
+await renderOrders();
 
-            await renderInvoices();
-
-            await update();
+        await update();
 
 
             if(
