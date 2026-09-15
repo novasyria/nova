@@ -1631,7 +1631,13 @@ const STORE_ID =
    CHECK STORE ID
 ===================================================== */
 
-if(!STORE_ID){
+const STORE_ID_UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+if(
+    !STORE_ID ||
+    !STORE_ID_UUID_RE.test(STORE_ID)
+){
 
     document.body.innerHTML = `
 
@@ -3802,7 +3808,7 @@ function card(product){
                 )}"
                 onclick="
                     event.stopPropagation();
-                    toggleFavorite('${esc(
+                    toggleFavorite('${jsStr(
                         product.id
                     )}')
                 "
@@ -3821,7 +3827,7 @@ function card(product){
                     product.images?.[0]
                 )}"
                 onclick="
-                    openProduct('${esc(
+                    openProduct('${jsStr(
                         product.id
                     )}')
                 "
@@ -4918,7 +4924,7 @@ function renderCart(){
                                 <button
                                     onclick="
                                         cartQty(
-                                            '${esc(
+                                            '${jsStr(
                                                 item.id
                                             )}',
                                             -1
@@ -4930,14 +4936,14 @@ function renderCart(){
 
 
                                 <b>
-                                    ${item.qty}
+                                    ${esc(item.qty)}
                                 </b>
 
 
                                 <button
                                     onclick="
                                         cartQty(
-                                            '${esc(
+                                            '${jsStr(
                                                 item.id
                                             )}',
                                             1
@@ -4951,7 +4957,7 @@ function renderCart(){
                                 <button
                                     onclick="
                                         removeCart(
-                                            '${esc(
+                                            '${jsStr(
                                                 item.id
                                             )}'
                                         )

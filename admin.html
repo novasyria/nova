@@ -2685,6 +2685,18 @@ const STORE_ID =
         window.location.search
     ).get("store");
 
+const STORE_ID_UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+if(
+    !STORE_ID ||
+    !STORE_ID_UUID_RE.test(STORE_ID)
+){
+    document.body.innerHTML =
+        '<div style="min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif">' +
+        '<div style="text-align:center;padding:30px"><h2>رابط غير صحيح</h2></div></div>';
+    throw new Error("STORE ID INVALID");
+}
 
 let data = {
     settings: {},
@@ -2857,7 +2869,8 @@ function esc(x){
         .replaceAll("&","&amp;")
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;");
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
 }
 
 
@@ -3339,6 +3352,15 @@ async function resizeImageToBlob(
        مع نفس الجودة الظاهرة، لتقليل استهلاك السحب.
        المتصفحات الحديثة كلها تعرض webP بشكل أصلي.
     ===================================================== */
+
+    if(
+        file &&
+        file.size > 20 * 1024 * 1024
+    ){
+        throw new Error(
+            "الصورة كبيرة جداً (أقصى حد 20MB)"
+        );
+    }
 
     const dataUrl =
         await base64(file);
@@ -6954,7 +6976,7 @@ function renderProducts(){
                     )
                     .map(
                         s =>
-                        s.title
+                        esc(s.title)
                     );
 
 
@@ -7376,7 +7398,6 @@ function statusName(status){
 
     return (
         map[status] ||
-        status ||
         "جديد"
     );
 }
