@@ -1806,6 +1806,111 @@ async function supabaseRequest(
 
 
 /* =====================================================
+   NOVA-MEDIA — تحديث ملف بيانات المتجر على CDN
+   (يُستخدم بعد إنشاء طلب: يعكس المخزون الجديد فوراً
+   لجميع الزوار عبر jsDelivr بلا حدود قراءة)
+===================================================== */
+
+const NOVA_MEDIA_FUNCTION =
+    SUPABASE_URL +
+    "/functions/v1/nova-media";
+
+
+let _cdnPushInFlight = false;
+
+
+async function pushStoreDataCDN(){
+
+    try{
+
+        if(_cdnPushInFlight)
+            return;
+
+
+        _cdnPushInFlight = true;
+
+
+        if(
+            !data ||
+            !data.store ||
+            !data.products
+        )
+            return;
+
+
+        const bundle = {
+
+            storeId:
+                data.store.id,
+
+            updatedAt:
+                new Date().toISOString(),
+
+            banners:
+                data.banners || [],
+            categories:
+                data.categories || [],
+            products:
+                data.products || [],
+            sections:
+                data.sections || [],
+            sectionProducts:
+                data.sectionProducts || []
+
+        };
+
+
+        const response =
+            await fetch(
+                NOVA_MEDIA_FUNCTION,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        apikey:
+                            SUPABASE_KEY,
+                        Authorization:
+                            "Bearer " +
+                            SUPABASE_KEY
+                    },
+
+                    body: JSON.stringify({
+                        action: "sync",
+                        storeId:
+                            data.store.id,
+                        content:
+                            bundle
+                    })
+                }
+            );
+
+
+        if(!response.ok)
+            throw new Error(
+                "CDN push failed: " +
+                response.status
+            );
+
+
+    }catch(error){
+
+        console.warn(
+            "تعذر تحديث بيانات المتجر على CDN",
+            error
+        );
+
+    }finally{
+
+        _cdnPushInFlight = false;
+
+    }
+
+}
+
+
+/* =====================================================
    DATA
 ===================================================== */
 
@@ -2355,45 +2460,108 @@ async function loadStore(){
 
 /* =================================================
    3-6 — BANNERS + CATEGORIES + PRODUCTS + SECTIONS
-   كلها متوازية (تعتمد فقط على storeId)
-================================================= */
+   أولاً: من CDN (قراءة مجانية بلا حدود — مثل الصور)
+   فإن تعذّر CDN: احتياط مباشر من Supabase
+   ================================================= */
 
-const [banners, categories, products, sections] =
-    await Promise.all([
+let banners = [];
+let categories = [];
+let products = [];
+let sections = [];
+let sectionProducts = [];
 
-        supabaseRequest("banners",{
-            query:
-                "?select=*" +
-                "&store_id=eq." + encodeURIComponent(storeId) +
-                "&active=eq.true" +
-                "&order=position.asc"
-        }),
+let fromCDN = false;
 
-        supabaseRequest("categories",{
-            query:
-                "?select=*" +
-                "&store_id=eq." + encodeURIComponent(storeId) +
-                "&active=eq.true" +
-                "&order=position.asc"
-        }),
+try{
 
-        supabaseRequest("products",{
-            query:
-                "?select=*" +
-                "&store_id=eq." + encodeURIComponent(storeId) +
-                "&active=eq.true" +
-                "&order=created_at.desc"
-        }),
+    const cdnUrl =
+        "https://cdn.jsdelivr.net/gh/novasyria/nova-images@main/store-data/" +
+        encodeURIComponent(storeId) +
+        ".json";
 
-        supabaseRequest("page_sections",{
-            query:
-                "?select=*" +
-                "&store_id=eq." + encodeURIComponent(storeId) +
-                "&active=eq.true" +
-                "&order=position.asc"
-        })
+    const cdnRes =
+        await fetch(cdnUrl, { cache: "no-store" });
 
-    ]);
+    if(cdnRes.ok){
+
+        const bundle =
+            await cdnRes.json();
+
+        if(
+            bundle &&
+            Array.isArray(bundle.banners) &&
+            Array.isArray(bundle.categories) &&
+            Array.isArray(bundle.products) &&
+            Array.isArray(bundle.sections)
+        ){
+
+            banners =
+                bundle.banners;
+            categories =
+                bundle.categories;
+            products =
+                bundle.products;
+            sections =
+                bundle.sections;
+            sectionProducts =
+                Array.isArray(bundle.sectionProducts)
+                ? bundle.sectionProducts
+                : [];
+
+            fromCDN = true;
+
+        }
+
+    }
+
+}catch(e){
+
+    /* CDN غير متاح — سنكمل من Supabase مباشرة */
+    fromCDN = false;
+
+}
+
+
+if(!fromCDN){
+
+    [banners, categories, products, sections] =
+        await Promise.all([
+
+            supabaseRequest("banners",{
+                query:
+                    "?select=*" +
+                    "&store_id=eq." + encodeURIComponent(storeId) +
+                    "&active=eq.true" +
+                    "&order=position.asc"
+            }),
+
+            supabaseRequest("categories",{
+                query:
+                    "?select=*" +
+                    "&store_id=eq." + encodeURIComponent(storeId) +
+                    "&active=eq.true" +
+                    "&order=position.asc"
+            }),
+
+            supabaseRequest("products",{
+                query:
+                    "?select=*" +
+                    "&store_id=eq." + encodeURIComponent(storeId) +
+                    "&active=eq.true" +
+                    "&order=created_at.desc"
+            }),
+
+            supabaseRequest("page_sections",{
+                query:
+                    "?select=*" +
+                    "&store_id=eq." + encodeURIComponent(storeId) +
+                    "&active=eq.true" +
+                    "&order=position.asc"
+            })
+
+        ]);
+
+}
 
 data.banners   = banners   || [];
 data.categories = categories || [];
@@ -2412,20 +2580,22 @@ data.products  =
 const sectionIds =
     (sections || []).map(s => String(s.id));
 
-const sectionProducts =
-    sectionIds.length
-    ? await supabaseRequest(
-          "page_section_products",
-          {
-              query:
-                  "?select=*" +
-                  "&section_id=in.(" +
-                  encodeURIComponent(sectionIds.join(",")) +
-                  ")" +
-                  "&order=position.asc"
-          }
-      )
-    : [];
+if(!fromCDN && sectionIds.length){
+
+    sectionProducts =
+        await supabaseRequest(
+            "page_section_products",
+            {
+                query:
+                    "?select=*" +
+                    "&section_id=in.(" +
+                    encodeURIComponent(sectionIds.join(",")) +
+                    ")" +
+                    "&order=position.asc"
+            }
+        );
+
+}
 
 data.pageSections =
     (sections || [])
@@ -2530,6 +2700,10 @@ data.pageSections =
             section.products.length
 
     );
+
+data.sections = sections || [];
+
+data.sectionProducts = sectionProducts || [];
 
 
 console.log(
@@ -5618,7 +5792,50 @@ async function confirmOrder(){
 
         /* =================================================
            التحقق من المخزون قبل إرسال الطلب
+           (قراءة حية واحدة صغيرة من Supabase — الكمية على
+           CDN قد تكون مؤقتة، فتؤكَّد لحظياً قبل الإنشاء)
         ================================================= */
+
+        const cartProductIds =
+            cart
+            .map(item => String(item.productId))
+            .filter(Boolean);
+
+        let liveProducts = [];
+
+        try{
+
+            liveProducts =
+                await supabaseRequest(
+                    "products",
+                    {
+                        query:
+                            "?select=id,stock" +
+                            "&store_id=eq." +
+                            encodeURIComponent(data.store.id) +
+                            "&id=in.(" +
+                            encodeURIComponent(
+                                cartProductIds.join(",")
+                            ) +
+                            ")"
+                    }
+                );
+
+        }catch(e){
+
+            liveProducts = [];
+
+        }
+
+        const liveMap =
+            {};
+
+        (liveProducts || []).forEach(
+            lp => {
+                liveMap[String(lp.id)] =
+                    Number(lp.stock ?? 999999);
+            }
+        );
 
         const stockIssue =
             cart
@@ -5633,22 +5850,19 @@ async function confirmOrder(){
 
                 return {
                     item,
-                    product
+                    product,
+                    available:
+                        liveMap[String(item.productId)] ??
+                        Number(
+                            product?.stock ?? 999999
+                        )
                 };
             })
             .find(
-                ({ item, product }) => {
-
-                    if(!product)
-                        return true;
+                ({ item, available }) => {
 
                     const wanted =
                         Number(item.qty || 0);
-
-                    const available =
-                        Number(
-                            product.stock ?? 999999
-                        );
 
                     return (
                         available >= 0 &&
@@ -5873,13 +6087,17 @@ async function confirmOrder(){
                                 productId
                         );
 
+                    const liveStock =
+                        liveMap[productId] ??
+                        Number(
+                            product?.stock ?? 0
+                        );
+
                     const newStock =
 
                         Math.max(
                             0,
-                            Number(
-                                product?.stock ?? 0
-                            )
+                            liveStock
 
                             -
 
@@ -5912,6 +6130,50 @@ async function confirmOrder(){
             )
 
         );
+
+
+        /* تحديث المخزون في الذاكرة المحلية */
+
+        Object.keys(
+            demanded
+        )
+        .forEach(
+            productId => {
+
+                const product =
+                    data.products.find(
+                        p =>
+                            String(p.id) ===
+                            productId
+                    );
+
+                if(!product)
+                    return;
+
+                const liveStock =
+                    liveMap[productId] ??
+                    Number(
+                        product?.stock ?? 0
+                    );
+
+                product.stock =
+                    Math.max(
+                        0,
+                        liveStock
+                        -
+                        Number(
+                            demanded[productId] || 0
+                        )
+                    );
+
+            }
+        );
+
+
+        /* تحديث ملف الأصناف على CDN فوراً
+           ليظهر المخزون الجديد للجميع */
+
+        pushStoreDataCDN();
 
 
         /* =================================================

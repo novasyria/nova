@@ -1253,6 +1253,160 @@ async function supabaseRequest(
 
 
 /* =========================================================
+   SYNC STORE DATA — رفع بيانات المتجر إلى CDN
+   (بعد كل حفظ/تعديل/حذف في لوحة الطلبات أيضاً)
+   ليقرأ المتجر من jsDelivr بلا حدود قراءة
+========================================================= */
+
+const NOVA_MEDIA_FUNCTION_ORDERS =
+    SUPABASE_URL +
+    "/functions/v1/nova-media";
+
+
+async function syncStoreData(){
+
+
+    if(!requireStore())
+        return;
+
+
+    try{
+
+
+        const storeId =
+            store.id;
+
+
+        const req =
+            (table, query) =>
+                supabaseRequest(
+                    table,
+                    { query: query || "" }
+                );
+
+
+        const [banners, categories, products, sections] =
+            await Promise.all([
+
+                req(
+                    "banners",
+                    "?select=*&store_id=eq." +
+                        encodeURIComponent(storeId) +
+                        "&active=eq.true&order=position.asc"
+                ),
+
+                req(
+                    "categories",
+                    "?select=*&store_id=eq." +
+                        encodeURIComponent(storeId) +
+                        "&active=eq.true&order=position.asc"
+                ),
+
+                req(
+                    "products",
+                    "?select=*&store_id=eq." +
+                        encodeURIComponent(storeId) +
+                        "&active=eq.true&order=created_at.desc"
+                ),
+
+                req(
+                    "page_sections",
+                    "?select=*&store_id=eq." +
+                        encodeURIComponent(storeId) +
+                        "&active=eq.true&order=position.asc"
+                )
+
+            ]);
+
+
+        const sectionIds =
+            (sections || [])
+            .map(s => String(s.id));
+
+
+        let sectionProducts = [];
+
+
+        if(sectionIds.length){
+
+            sectionProducts =
+                await req(
+                    "page_section_products",
+                    "?select=*&section_id=in.(" +
+                        encodeURIComponent(
+                            sectionIds.join(",")
+                        ) +
+                        ")&order=position.asc"
+                );
+
+        }
+
+
+        const bundle = {
+
+            storeId,
+            updatedAt:
+                new Date().toISOString(),
+
+            banners:
+                banners || [],
+            categories:
+                categories || [],
+            products:
+                products || [],
+            sections:
+                sections || [],
+            sectionProducts:
+                sectionProducts || []
+
+        };
+
+
+        const response =
+            await fetch(
+                NOVA_MEDIA_FUNCTION_ORDERS,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        apikey:
+                            SUPABASE_KEY,
+                        Authorization:
+                            "Bearer " +
+                            SUPABASE_KEY
+                    },
+
+                    body: JSON.stringify({
+                        action: "sync",
+                        storeId,
+                        content: bundle
+                    })
+                }
+            );
+
+
+        if(!response.ok)
+            throw new Error(
+                "sync failed: " +
+                response.status
+            );
+
+
+    }catch(error){
+
+        console.warn(
+            "تعذرت مزامنة بيانات المتجر إلى CDN",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    ERROR
    ========================================================= */
 
@@ -2871,6 +3025,8 @@ async function saveBanner(){
             "تم حفظ البنر ✓"
         );
 
+        syncStoreData();
+
 
     }catch(error){
 
@@ -3168,6 +3324,8 @@ async function saveCategory(){
             "تم حفظ القسم ✓"
         );
 
+        syncStoreData();
+
 
     }catch(error){
 
@@ -3246,6 +3404,8 @@ async function deleteCategory(id){
         toast(
             "تم حذف القسم"
         );
+
+        syncStoreData();
 
 
     }catch(error){
@@ -3788,6 +3948,8 @@ async function savePageSection(){
             "تم حفظ قسم الصفحة ✓"
         );
 
+        syncStoreData();
+
 
     }catch(error){
 
@@ -3844,6 +4006,8 @@ async function deletePageSection(id){
         toast(
             "تم حذف القسم"
         );
+
+        syncStoreData();
 
 
     }catch(error){
@@ -4740,6 +4904,8 @@ async function saveProduct(){
             "تم حفظ المنتج ✓"
         );
 
+        syncStoreData();
+
 
     }catch(error){
 
@@ -4990,6 +5156,8 @@ async function deleteProduct(id){
         toast(
             "تم حذف المنتج"
         );
+
+        syncStoreData();
 
 
     }catch(error){
