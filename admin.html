@@ -9472,6 +9472,7 @@ setInterval(
         try{
 
             if(
+                document.hidden ||
                 !STORE_ID ||
                 !store ||
                 document.querySelector(".modal.show") ||
@@ -9513,7 +9514,7 @@ setInterval(
         }
 
     },
-    5000
+    30000
 );
 
 

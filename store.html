@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NOVA STORE</title>
 
+<link rel="preconnect" href="https://xtsumqxirkziawlmttbg.supabase.co" crossorigin>
+<link rel="preconnect" href="https://raw.githubusercontent.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://xtsumqxirkziawlmttbg.supabase.co">
+<link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 
@@ -1693,6 +1700,106 @@ if(
 
 
 /* =====================================================
+   STORE CACHE (localStorage)
+   يعرض محتوى المتجر فوراً للزائر المتكرر بدل انتظار
+   الشبكة، ثم يحدّث الخلفية بالبيانات الجديدة.
+   المفتاح خاص بكل متجر.
+===================================================== */
+
+const STORE_CACHE_KEY =
+    "nova_store_" + STORE_ID;
+
+const STORE_CACHE_TTL =
+    24 * 60 * 60 * 1000; // 24 ساعة
+
+
+function readStoreCache(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                STORE_CACHE_KEY
+            );
+
+        if(!raw)
+            return null;
+
+        const parsed =
+            JSON.parse(raw);
+
+        if(
+            !parsed ||
+            !parsed.savedAt ||
+            !parsed.data
+        )
+            return null;
+
+        const age =
+            Date.now() -
+            Number(parsed.savedAt || 0);
+
+        if(age > STORE_CACHE_TTL)
+            return null;
+
+        return parsed.data;
+
+    }catch(e){
+
+        return null;
+
+    }
+
+}
+
+
+function writeStoreCache(){
+
+    try{
+
+        localStorage.setItem(
+            STORE_CACHE_KEY,
+            JSON.stringify({
+                savedAt:
+                    Date.now(),
+
+                data: {
+                    store:
+                        data.store,
+
+                    settings:
+                        data.settings,
+
+                    banners:
+                        data.banners,
+
+                    categories:
+                        data.categories,
+
+                    products:
+                        data.products,
+
+                    pageSections:
+                        data.pageSections,
+
+                    sections:
+                        data.sections,
+
+                    sectionProducts:
+                        data.sectionProducts
+                }
+            })
+        );
+
+    }catch(e){
+
+        /* localStorage ممتلئ أو معطّل — نتجاهل */
+    }
+
+}
+
+
+/* =====================================================
    SUPABASE REQUEST
 ===================================================== */
 
@@ -2290,32 +2397,77 @@ async function loadStore(){
     try{
 
         /* =================================================
-           1 - STORE
-           نبحث عن المتجر بواسطة ID الموجود بالرابط
+           COLLECT ALL DATA IN PARALLEL (تجميع ثلاثي متوازي)
+           كلهم يحتاجون فقط STORE_ID من الرابط — لا تبع tls
         ================================================= */
 
-        const stores =
-            await supabaseRequest(
+        const cdnUrl =
+            "https://raw.githubusercontent.com/novasyria/nova-images/main/store-data/" +
+            encodeURIComponent(STORE_ID) +
+            ".json";
 
-                "stores",
+        const [stores, settings, cdnResult] =
+            await Promise.all([
 
-                {
+                supabaseRequest(
+                    "stores",
+                    {
+                        query:
+                            "?select=*" +
+                            "&id=eq." +
+                            encodeURIComponent(STORE_ID) +
+                            "&limit=1"
+                    }
+                ),
 
-                    query:
-                        "?select=*" +
+                supabaseRequest(
+                    "store_settings",
+                    {
+                        query:
+                            "?select=*" +
+                            "&store_id=eq." +
+                            encodeURIComponent(STORE_ID) +
+                            "&limit=1"
+                    }
+                ),
 
-                        "&id=eq." +
+                (async () => {
+                    try{
 
-                        encodeURIComponent(
-                            STORE_ID
-                        ) +
+                        const cdnRes =
+                            await fetch(
+                                cdnUrl,
+                                { cache: "no-store" }
+                            );
 
-                        "&limit=1"
+                        if(!cdnRes.ok)
+                            return null;
 
-                }
+                        const bundle =
+                            await cdnRes.json();
 
-            );
+                        if(
+                            bundle &&
+                            Array.isArray(bundle.banners) &&
+                            Array.isArray(bundle.categories) &&
+                            Array.isArray(bundle.products) &&
+                            Array.isArray(bundle.sections)
+                        )
+                            return bundle;
 
+                        return null;
+
+                    }catch(e){
+                        return null;
+                    }
+                })()
+
+            ]);
+
+
+        /* =================================================
+           1 - STORE (netcheck)
+        ================================================= */
 
         if(
             !stores ||
@@ -2328,9 +2480,12 @@ async function loadStore(){
 
         }
 
-
         data.store =
             stores[0];
+
+
+        const storeId =
+            data.store.id;
 
 
         /* =================================================
@@ -2359,42 +2514,14 @@ async function loadStore(){
         }
 
 
-        const storeId =
-            data.store.id;
-
-
         /* =================================================
            2 - SETTINGS
         ================================================= */
-
-        const settings =
-            await supabaseRequest(
-
-                "store_settings",
-
-                {
-
-                    query:
-                        "?select=*" +
-
-                        "&store_id=eq." +
-
-                        encodeURIComponent(
-                            storeId
-                        ) +
-
-                        "&limit=1"
-
-                }
-
-            );
-
 
         if(settings.length){
 
             const s =
                 settings[0];
-
 
             data.settings = {
 
@@ -2478,52 +2605,23 @@ let sectionProducts = [];
 
 let fromCDN = false;
 
-try{
 
-    const cdnUrl =
-        "https://raw.githubusercontent.com/novasyria/nova-images/main/store-data/" +
-        encodeURIComponent(storeId) +
-        ".json";
+if(cdnResult){
 
-    const cdnRes =
-        await fetch(cdnUrl, { cache: "no-store" });
+    banners =
+        cdnResult.banners;
+    categories =
+        cdnResult.categories;
+    products =
+        cdnResult.products;
+    sections =
+        cdnResult.sections;
+    sectionProducts =
+        Array.isArray(cdnResult.sectionProducts)
+        ? cdnResult.sectionProducts
+        : [];
 
-    if(cdnRes.ok){
-
-        const bundle =
-            await cdnRes.json();
-
-        if(
-            bundle &&
-            Array.isArray(bundle.banners) &&
-            Array.isArray(bundle.categories) &&
-            Array.isArray(bundle.products) &&
-            Array.isArray(bundle.sections)
-        ){
-
-            banners =
-                bundle.banners;
-            categories =
-                bundle.categories;
-            products =
-                bundle.products;
-            sections =
-                bundle.sections;
-            sectionProducts =
-                Array.isArray(bundle.sectionProducts)
-                ? bundle.sectionProducts
-                : [];
-
-            fromCDN = true;
-
-        }
-
-    }
-
-}catch(e){
-
-    /* CDN غير متاح — سنكمل من Supabase مباشرة */
-    fromCDN = false;
+    fromCDN = true;
 
 }
 
@@ -2917,13 +3015,82 @@ function safeImgSrc(url){
 
 async function init(){
 
+    /* ✅ عرض فوري من الكاش إن وُجد (للزائر المتكرر) */
+    const cached = readStoreCache();
+
+    if(cached){
+
+        data.store =
+            cached.store ||
+            data.store;
+
+        data.settings =
+            cached.settings ||
+            data.settings;
+
+        data.banners =
+            cached.banners ||
+            [];
+
+        data.categories =
+            cached.categories ||
+            [];
+
+        data.products =
+            cached.products ||
+            [];
+
+        data.pageSections =
+            cached.pageSections ||
+            [];
+
+        data.sections =
+            cached.sections ||
+            [];
+
+        data.sectionProducts =
+            cached.sectionProducts ||
+            [];
+
+        renderStore();
+
+        /* تحديث الخلفية بالبيانات الطازجة بعد العرض الفوري */
+        setTimeout(
+            async () => {
+
+                try{
+
+                    await loadStore();
+
+                    renderStore();
+
+                    writeStoreCache();
+
+                }catch(e){
+                    /* البيانات القديمة ما زالت تعمل */
+                }
+
+            },
+            50
+        );
+
+        return;
+    }
+
     await loadStore();
 
+    renderStore();
+
+    writeStoreCache();
+
+}
+
+
+function renderStore(){
 
     loadFavorites();
 
     cleanFavorites();
-
 
     document.documentElement
         .style
@@ -2936,7 +3103,6 @@ async function init(){
 
         );
 
-
     document.documentElement
         .style
         .setProperty(
@@ -2948,14 +3114,12 @@ async function init(){
 
         );
 
-
     document.getElementById(
         "storeName"
     ).textContent =
 
         data.settings.name ||
         "NOVA STORE";
-
 
     document.getElementById(
         "subtitle"
@@ -2964,12 +3128,10 @@ async function init(){
         data.settings.subtitle ||
         "";
 
-
     const logoEl =
         document.getElementById(
             "logo"
         );
-
 
     if(data.settings.logo){
 
@@ -2985,7 +3147,6 @@ async function init(){
             "none";
 
     }
-
 
     renderBanner();
 
