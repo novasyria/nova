@@ -3960,7 +3960,11 @@ function card(product){
 
     return `
 
-        <article class="product">
+        <article class="product"
+            onclick="openProduct('${jsStr(
+                product.id
+            )}')"
+        >
 
             <button
                 class="heart"
