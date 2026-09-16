@@ -2989,13 +2989,10 @@ function esc(value){
 
 function jsStr(value){
 
-    const s = JSON.stringify(String(value ?? ""));
+    return String(value ?? "")
 
-    return s
-
-        .replace(/</g, "\\u003c")
-        .replace(/>/g, "\\u003e")
-        .replace(/'/g, "\\u0027");
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
 
 }
 
