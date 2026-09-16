@@ -2989,10 +2989,13 @@ function esc(value){
 
 function jsStr(value){
 
-    return String(value ?? "")
+    const s = JSON.stringify(String(value ?? ""));
 
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'");
+    return s
+
+        .replace(/</g, "\\u003c")
+        .replace(/>/g, "\\u003e")
+        .replace(/'/g, "\\u0027");
 
 }
 
@@ -3958,9 +3961,9 @@ function card(product){
     return `
 
         <article class="product"
-            onclick="openProduct('${jsStr(
+            onclick='openProduct(${jsStr(
                 product.id
-            )}')"
+            )})'
         >
 
             <button
@@ -3968,12 +3971,12 @@ function card(product){
                 data-favorite-id="${esc(
                     product.id
                 )}"
-                onclick="
+                onclick='
                     event.stopPropagation();
-                    toggleFavorite('${jsStr(
+                    toggleFavorite(${jsStr(
                         product.id
-                    )}')
-                "
+                    )})
+                '
             >
                 ${
                     liked
@@ -3988,11 +3991,11 @@ function card(product){
                 src="${safeImgSrc(
                     product.images?.[0]
                 )}"
-                onclick="
-                    openProduct('${jsStr(
+                onclick='
+                    openProduct(${jsStr(
                         product.id
-                    )}')
-                "
+                    )})
+                '
             >
 
 
@@ -5084,14 +5087,14 @@ function renderCart(){
                             >
 
                                 <button
-                                    onclick="
+                                    onclick='
                                         cartQty(
-                                            '${jsStr(
+                                            ${jsStr(
                                                 item.id
-                                            )}',
+                                            )},
                                             -1
                                         )
-                                    "
+                                    '
                                 >
                                     −
                                 </button>
@@ -5103,27 +5106,27 @@ function renderCart(){
 
 
                                 <button
-                                    onclick="
+                                    onclick='
                                         cartQty(
-                                            '${jsStr(
+                                            ${jsStr(
                                                 item.id
-                                            )}',
+                                            )},
                                             1
                                         )
-                                    "
+                                    '
                                 >
                                     +
                                 </button>
 
 
                                 <button
-                                    onclick="
+                                    onclick='
                                         removeCart(
-                                            '${jsStr(
+                                            ${jsStr(
                                                 item.id
-                                            )}'
+                                            )}
                                         )
-                                    "
+                                    '
                                     style="
                                         color:#d33;
                                         margin-right:8px
