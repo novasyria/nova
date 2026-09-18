@@ -1561,20 +1561,16 @@ function getDisplayStatus(store){
             ? new Date(store.expires_at)
             : null;
 
-    if(
-        store.status === "trial" &&
-        expires &&
-        now >= expires
-    ){
-        return "trial_expired";
-    }
+    /* FREE PLAN: لا تنتهي أبداً — تبقى مفتوحة مع حد 15 منتج */
+    if(store.status === "trial")
+        return "trial";
 
     if(
         store.status === "monthly" &&
         expires &&
         now >= expires
     ){
-        return "monthly_expired";
+        return "free_fallback";
     }
 
     if(
@@ -1582,7 +1578,7 @@ function getDisplayStatus(store){
         expires &&
         now >= expires
     ){
-        return "yearly_expired";
+        return "free_fallback";
     }
 
     return store.status || "trial";
@@ -1591,12 +1587,13 @@ function getDisplayStatus(store){
 function subStatusText(status){
 
     const statuses = {
-        trial:"تجربة مجانية",
-        trial_expired:"انتهت التجربة المجانية",
-        monthly:"اشتراك شهري",
-        monthly_expired:"انتهى الاشتراك الشهري",
-        yearly:"اشتراك سنوي",
-        yearly_expired:"انتهى الاشتراك السنوي",
+        trial:"الخطة المجانية (حتى 15 منتج)",
+        free_fallback:"الخطة المجانية (حتى 15 منتج)",
+        trial_expired:"الخطة المجانية (حتى 15 منتج)",
+        monthly:"اشتراك شهري — منتجات غير محدودة",
+        monthly_expired:"انتهى الاشتراك — عاد للخطة المجانية",
+        yearly:"اشتراك سنوي — منتجات غير محدودة",
+        yearly_expired:"انتهى الاشتراك — عاد للخطة المجانية",
         stopped:"متجر متوقف"
     };
 
@@ -1607,7 +1604,7 @@ function subStatusText(status){
 
 function subStatusClass(status){
 
-    if(status === "trial") return "subBadge-trial";
+    if(status === "trial" || status === "free_fallback" || status === "trial_expired") return "subBadge-trial";
     if(status === "monthly") return "subBadge-monthly";
     if(status === "yearly") return "subBadge-yearly";
     if(status === "stopped") return "subBadge-stopped";
@@ -1626,10 +1623,7 @@ function renderSubscriptionStatus(){
     if(!badge) return;
 
     const isActive =
-        status !== "stopped" &&
-        status !== "trial_expired" &&
-        status !== "monthly_expired" &&
-        status !== "yearly_expired";
+        status !== "stopped";
 
     badge.className =
         "subBadge " + subStatusClass(status);
@@ -1644,9 +1638,9 @@ function renderSubscriptionStatus(){
             : "—";
 
     document.getElementById("subEndDate").textContent =
-        store.expires_at
+        store.expires_at && status !== "trial"
             ? formatDate(store.expires_at)
-            : "—";
+            : "مفتوح باستمرار";
 
     const note =
         document.getElementById("subNote");
@@ -1660,11 +1654,50 @@ function renderSubscriptionStatus(){
                 ? "تم إيقاف متجرك من قبل الإدارة. تواصل معنا لإعادة تفعيله."
                 : "انتهت مدة اشتراكك. تواصل معنا لتجديد الاشتراك ومتابعة العمل على متجرك.";
 
+    }else if(status === "free_fallback"){
+
+        note.style.display = "block";
+
+        note.textContent =
+            "انتهى اشتراكك المدفوع، فعاد متجرك تلقائياً للخطة المجانية (حتى 15 منتج). لتجديد الاشتراك والحصول على منتجات غير محدودة تواصل معنا.";
+
+    }else if(status === "trial"){
+
+        note.style.display = "block";
+
+        note.textContent =
+            "تسمح الخطة المجانية بإضافة حتى 15 منتج. للترقية والحصول على منتجات غير محدودة تواصل معنا.";
+
     }else{
 
         note.style.display = "none";
         note.textContent = "";
     }
+}
+
+
+/* =========================================================
+   PRODUCT LIMIT — حد المنتجات حسب الخطة
+   ========================================================= */
+
+const FREE_PRODUCT_LIMIT = 15;
+
+function planHasUnlimitedProducts(){
+
+    if(!store)
+        return false;
+
+    const status =
+        getDisplayStatus(store);
+
+    return status === "monthly" ||
+           status === "yearly";
+}
+
+
+function getActiveProductCount(){
+
+    return (data.products || []).length;
 }
 
 
@@ -4145,6 +4178,8 @@ async function movePageSection(
             "تم تغيير الترتيب ✓"
         );
 
+        syncStoreData();
+
 
     }catch(error){
 
@@ -4645,6 +4680,22 @@ async function saveProduct(){
             document.getElementById(
                 "productId"
             ).value;
+
+
+        if(
+            !id &&
+            !planHasUnlimitedProducts() &&
+            getActiveProductCount() >= FREE_PRODUCT_LIMIT
+        ){
+
+            toast(
+                "الخطة المجانية تتيح حتى " +
+                FREE_PRODUCT_LIMIT +
+                " منتج فقط. قم بترقية اشتراكك لإضافة المزيد."
+            );
+
+            return;
+        }
 
 
         const name =
