@@ -8636,8 +8636,10 @@ function normPhone(s){
         .replace(/[\u06F0-\u06F9]/g,
             d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
         .replace(/\D/g, "");
-    if(t.startsWith("963") && t.length > 10)
+    if(t.length > 10 && t.startsWith("963"))
         t = t.slice(3);
+    if(t.startsWith("0"))
+        t = t.slice(1);
     return t;
 }
 
