@@ -8629,6 +8629,18 @@ async function renderInvoices(){
 
 let customersCache = [];
 
+function normPhone(s){
+    let t = String(s || "")
+        .replace(/[\u0660-\u0669]/g,
+            d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+        .replace(/[\u06F0-\u06F9]/g,
+            d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+        .replace(/\D/g, "");
+    if(t.startsWith("963") && t.length > 10)
+        t = t.slice(3);
+    return t;
+}
+
 async function renderCustomers(){
 
     const orders =
@@ -8647,11 +8659,15 @@ async function renderCustomers(){
             (o.customer?.name || "")
             .trim();
 
-        if(!phone || phone === "—")
+        if(
+            !phone ||
+            phone === "—" ||
+            !normPhone(phone)
+        )
             return;
 
         const key =
-            phone + "::" + name;
+            normPhone(phone);
 
         if(!groupMap[key]){
 
@@ -8704,13 +8720,10 @@ async function renderCustomers(){
                         (p.customer_phone || "")
                         .trim();
 
-                    const pn =
-                        (p.customer_name || "")
-                        .trim();
-
                     if(
-                        pp === g.phone &&
-                        pn === g.name &&
+                        pp &&
+                        normPhone(pp) ===
+                            normPhone(g.phone) &&
                         Number(p.amount || 0) > 0
                     )
                         paid += Number(p.amount);
@@ -8814,7 +8827,7 @@ function filterCustomers(){
                     <td style="color:#168a4a">${formatMoney(c.totalPaid)}</td>
                     <td style="color:${statusColor};font-weight:bold">${formatMoney(remaining)}</td>
                     <td>
-                        <button class="secondary" onclick="viewCustomerDetails('${jsStr(c.phone)}','${jsStr(c.name)}')" style="margin:2px;font-size:12px">
+                        <button class="secondary" onclick="viewCustomerDetails('${jsStr(c.phone)}')" style="margin:2px;font-size:12px">
                             📋 تفاصيل
                         </button>
                     </td>
@@ -8827,28 +8840,39 @@ function filterCustomers(){
 }
 
 
-async function viewCustomerDetails(phone, name){
+async function viewCustomerDetails(phone){
+
+    const pn =
+        normPhone(phone);
 
     const c =
         customersCache.find(
             x =>
-                x.phone === phone &&
-                x.name === (name || "")
+                normPhone(x.phone) === pn
         );
 
     if(!c)
         return;
 
-    const ownOrders =
-        c.orders.filter(
-            o =>
-                (o.customer?.name || "").trim() ===
-                (name || "").trim()
-        );
+    let orders = [];
+
+    try{
+
+        const fresh =
+            await getOrders();
+
+        if(Array.isArray(fresh) && fresh.length)
+            orders = fresh;
+
+    }catch(e){}
 
     const ordersForView =
-        ownOrders.length > 0
-            ? ownOrders
+        orders.length
+            ? orders.filter(o =>
+                normPhone(
+                    o.customer?.phone || ""
+                ) === pn
+              )
             : c.orders;
 
     document.getElementById("customerModalTitle").textContent =
@@ -8865,10 +8889,6 @@ async function viewCustomerDetails(phone, name){
                 {
                     query: "?select=*&store_id=eq." +
                         encodeURIComponent(store.id) +
-                        "&customer_phone=eq." +
-                        encodeURIComponent(phone) +
-                        "&customer_name=eq." +
-                        encodeURIComponent(name || "") +
                         "&order=created_at.desc"
                 }
             );
@@ -8878,6 +8898,14 @@ async function viewCustomerDetails(phone, name){
         payRows = [];
 
     }
+
+    payRows =
+        (payRows || [])
+        .filter(p =>
+            normPhone(
+                p.customer_phone || ""
+            ) === pn
+        );
 
     const totalOrders =
         ordersForView
