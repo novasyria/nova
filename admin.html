@@ -8635,7 +8635,7 @@ async function renderCustomers(){
     const orders =
         await getOrders();
 
-    const phoneMap =
+    const groupMap =
         {};
 
     orders.forEach(o => {
@@ -8644,15 +8644,22 @@ async function renderCustomers(){
             (o.customer?.phone || "")
             .trim();
 
+        const name =
+            (o.customer?.name || "")
+            .trim();
+
         if(!phone || phone === "—")
             return;
 
-        if(!phoneMap[phone]){
+        const key =
+            phone + "::" + name;
 
-            phoneMap[phone] = {
+        if(!groupMap[key]){
+
+            groupMap[key] = {
 
                 phone: phone,
-                name: o.customer?.name || "",
+                name: name,
                 city: o.customer?.city || "",
                 address: o.customer?.address || "",
                 orders: [],
@@ -8662,13 +8669,13 @@ async function renderCustomers(){
 
         }
 
-        const c = phoneMap[phone];
-
-        if(o.customer?.name && !c.name)
-            c.name = o.customer.name;
+        const c = groupMap[key];
 
         if(o.customer?.city && !c.city)
             c.city = o.customer.city;
+
+        if(o.customer?.name && o.customer?.name.trim())
+            c.name = o.customer.name.trim();
 
         c.orders.push(o);
 
@@ -8687,18 +8694,26 @@ async function renderCustomers(){
 
         if(Array.isArray(payRows)){
 
-            payRows.forEach(p => {
+            Object.values(groupMap)
+            .forEach(g => {
 
-                const pp =
-                    (p.customer_phone || "")
-                    .trim();
+                let paid = 0;
 
-                if(phoneMap[pp]){
+                payRows.forEach(p => {
 
-                    phoneMap[pp].totalPaid +=
-                        Number(p.amount || 0);
+                    const pp =
+                        (p.customer_phone || "")
+                        .trim();
 
-                }
+                    if(
+                        pp === g.phone &&
+                        Number(p.amount || 0) > 0
+                    )
+                        paid += Number(p.amount);
+
+                });
+
+                g.totalPaid = paid;
 
             });
 
@@ -8714,7 +8729,7 @@ async function renderCustomers(){
     }
 
     customersCache =
-        Object.values(phoneMap)
+        Object.values(groupMap)
         .sort(
             (a,b) =>
                 b.orders.length -
@@ -8796,7 +8811,7 @@ function filterCustomers(){
                     <td style="color:#168a4a">${formatMoney(c.totalPaid)}</td>
                     <td style="color:${statusColor};font-weight:bold">${formatMoney(remaining)}</td>
                     <td>
-                        <button class="secondary" onclick="viewCustomerDetails('${jsStr(c.phone)}')" style="margin:2px;font-size:12px">
+                        <button class="secondary" onclick="viewCustomerDetails('${jsStr(c.phone)}','${jsStr(c.name)}')" style="margin:2px;font-size:12px">
                             📋 تفاصيل
                         </button>
                     </td>
@@ -8809,15 +8824,29 @@ function filterCustomers(){
 }
 
 
-async function viewCustomerDetails(phone){
+async function viewCustomerDetails(phone, name){
 
     const c =
         customersCache.find(
-            x => x.phone === phone
+            x =>
+                x.phone === phone &&
+                x.name === (name || "")
         );
 
     if(!c)
         return;
+
+    const ownOrders =
+        c.orders.filter(
+            o =>
+                (o.customer?.name || "").trim() ===
+                (name || "").trim()
+        );
+
+    const ordersForView =
+        ownOrders.length > 0
+            ? ownOrders
+            : c.orders;
 
     document.getElementById("customerModalTitle").textContent =
         "📋 زبون: " + c.name +
@@ -8846,7 +8875,7 @@ async function viewCustomerDetails(phone){
     }
 
     const totalOrders =
-        c.orders
+        ordersForView
         .filter(o => o.status !== "cancelled")
         .reduce((s,o) => s + o.total, 0);
 
@@ -8858,7 +8887,7 @@ async function viewCustomerDetails(phone){
         Math.max(0, totalOrders - totalPaid);
 
     const ordersHtml =
-        c.orders.map(o => {
+        ordersForView.map(o => {
 
             const status =
                 o.status === "new" ? "جديد"
@@ -8922,7 +8951,7 @@ async function viewCustomerDetails(phone){
             💰 تسجيل دفعة
         </button>
 
-        <h3 style="margin-bottom:10px">🛒 الطلبات (${c.orders.length})</h3>
+        <h3 style="margin-bottom:10px">🛒 الطلبات (${ordersForView.length})</h3>
         <div class="table" style="max-height:250px;overflow-y:auto;margin-bottom:20px">
             <table>
                 <thead>
