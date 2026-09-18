@@ -8705,8 +8705,13 @@ async function renderCustomers(){
                         (p.customer_phone || "")
                         .trim();
 
+                    const pn =
+                        (p.customer_name || "")
+                        .trim();
+
                     if(
                         pp === g.phone &&
+                        pn === g.name &&
                         Number(p.amount || 0) > 0
                     )
                         paid += Number(p.amount);
@@ -8864,6 +8869,8 @@ async function viewCustomerDetails(phone, name){
                         encodeURIComponent(store.id) +
                         "&customer_phone=eq." +
                         encodeURIComponent(phone) +
+                        "&customer_name=eq." +
+                        encodeURIComponent(name || "") +
                         "&order=created_at.desc"
                 }
             );
