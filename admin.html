@@ -2228,7 +2228,6 @@ oninput="renderOrders()"
 <th>رقم الهاتف</th>
 <th>المدينة</th>
 <th>عدد الطلبات</th>
-<th>إجمالي المطلوب</th>
 <th>المدفوع</th>
 <th>المتبقي</th>
 <th>إدارة</th>
@@ -8777,7 +8776,7 @@ function filterCustomers(){
 
         body.innerHTML = `
             <tr>
-                <td colspan="8">
+                <td colspan="7">
                     <div class="empty">
                         <div class="emptyIcon">👥</div>
                         لا يوجد زبائن بعد
@@ -8812,7 +8811,6 @@ function filterCustomers(){
                     <td dir="ltr">${esc(c.phone)}</td>
                     <td>${esc(c.city)}</td>
                     <td>${c.orders.length}</td>
-                    <td>${formatMoney(totalOrders)}</td>
                     <td style="color:#168a4a">${formatMoney(c.totalPaid)}</td>
                     <td style="color:${statusColor};font-weight:bold">${formatMoney(remaining)}</td>
                     <td>
@@ -8939,11 +8937,7 @@ async function viewCustomerDetails(phone, name){
 
     document.getElementById("customerModalBody").innerHTML = `
 
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin:15px 0">
-            <div class="stat" style="text-align:center;padding:15px;background:#f8f8fb;border-radius:12px">
-                <div style="font-size:13px;color:#888">إجمالي الفواتير</div>
-                <div style="font-size:22px;font-weight:bold;margin-top:5px">${formatMoney(totalOrders)}</div>
-            </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:15px 0">
             <div class="stat" style="text-align:center;padding:15px;background:#e8f9ee;border-radius:12px">
                 <div style="font-size:13px;color:#888">المدفوع</div>
                 <div style="font-size:22px;font-weight:bold;margin-top:5px;color:#168a4a">${formatMoney(totalPaid)}</div>
