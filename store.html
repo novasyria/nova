@@ -3008,6 +3008,30 @@ function safeImgSrc(url){
 
 }
 
+function optImg(url, w){
+
+    const u = String(url || "");
+
+    if(!u.startsWith("https:"))
+        return "";
+
+    if(u.indexOf("images.unsplash.com") === -1)
+        return u;
+
+    if(!w)
+        return u;
+
+    if(u.indexOf("w=") === -1)
+        return u +
+            (u.indexOf("?") === -1 ? "?" : "&") +
+            "w=" + w + "&q=75";
+
+    return u
+        .replace(/([?&])w=\d+/i, "$1w=" + w)
+        .replace(/([?&])q=\d+/i, "$1q=75");
+
+}
+
 
 /* =====================================================
    INIT
@@ -3187,9 +3211,12 @@ function renderBanner(){
     bannerContentEl.innerHTML = `
 
         <img
-            src="${safeImgSrc(
-                b.image || ""
+            src="${optImg(
+                b.image || "",
+                800
             )}"
+            fetchpriority="high"
+            decoding="async"
         >
 
         <div class="overlay">
@@ -3240,8 +3267,11 @@ function renderSecondBanner(){
     el.innerHTML = `
 
         <img
-            src="${safeImgSrc(
-                b.image || ""
+            loading="lazy"
+            decoding="async"
+            src="${optImg(
+                b.image || "",
+                700
             )}"
         >
 
@@ -3362,13 +3392,14 @@ function renderCategories(
         >
 
             <img
-                src="${
-                    esc(
-                        data.settings.logo ||
-                        data.banners[0]?.image ||
-                        ""
-                    )
-                }"
+                loading="lazy"
+                decoding="async"
+                src="${optImg(
+                    data.settings.logo ||
+                    data.banners[0]?.image ||
+                    "",
+                    160
+                )}"
             >
 
             <p>
@@ -3395,15 +3426,18 @@ function renderCategories(
                         ? "active"
                         : ""
                     }"
-                    data-id="${esc(c.id)}"
+data-id="${esc(c.id)}"
                     onclick='openCategory(${jsStr(
                         c.id
                     )})'
                 >
 
                     <img
-                        src="${safeImgSrc(
-                            c.image || ""
+                        loading="lazy"
+                        decoding="async"
+                        src="${optImg(
+                            c.image || "",
+                            160
                         )}"
                     >
 
@@ -3988,8 +4022,10 @@ function card(product){
 
             <img
                 loading="lazy"
-                src="${safeImgSrc(
-                    product.images?.[0]
+                decoding="async"
+                src="${optImg(
+                    product.images?.[0],
+                    450
                 )}"
                 onclick='
                     openProduct(${jsStr(
@@ -4158,8 +4194,9 @@ function openProduct(id){
         (current.images || []);
 
     mainImage.src =
-        safeImgSrc(
-            imgList[0]
+        optImg(
+            imgList[0],
+            900
         );
 
     updateGalleryCounter(imgList.length);
@@ -4185,8 +4222,8 @@ function openProduct(id){
                         ? "active"
                         : ""
                     }"
-                    src="${safeImgSrc(image)}"
-                    onclick='document.getElementById("mainImage").src=${jsStr(image)};
+                    src="${optImg(image, 200)}"
+                    onclick='document.getElementById("mainImage").src=${jsStr(optImg(image, 900))};
                         galleryIndex=${index};
                         updateGalleryCounter(${imgList.length});
                         document
@@ -4327,8 +4364,9 @@ function galleryStep(dir){
         imgList.length;
 
     mainImage.src =
-        safeImgSrc(
-            imgList[galleryIndex]
+        optImg(
+            imgList[galleryIndex],
+            900
         );
 
     document
@@ -5049,8 +5087,11 @@ function renderCart(){
                     <div class="cartItem">
 
                         <img
-                            src="${safeImgSrc(
-                                product.images?.[0]
+                            loading="lazy"
+                            decoding="async"
+                            src="${optImg(
+                                product.images?.[0],
+                                160
                             )}"
                         >
 
