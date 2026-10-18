@@ -6,10 +6,8 @@
 <title>NOVA STORE</title>
 
 <link rel="preconnect" href="https://xtsumqxirkziawlmttbg.supabase.co" crossorigin>
-<link rel="preconnect" href="https://raw.githubusercontent.com">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://xtsumqxirkziawlmttbg.supabase.co">
-<link rel="dns-prefetch" href="https://raw.githubusercontent.com">
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
 <style>
@@ -2402,9 +2400,10 @@ async function loadStore(){
         ================================================= */
 
         const cdnUrl =
-            "https://raw.githubusercontent.com/novasyria/nova-images/main/store-data/" +
+            "https://cdn.jsdelivr.net/gh/novasyria/nova-images@main/store-data/" +
             encodeURIComponent(STORE_ID) +
-            ".json";
+            ".json?v=" +
+            Math.floor(Date.now() / 1800000);
 
         const [stores, settings, cdnResult] =
             await Promise.all([
@@ -2432,12 +2431,27 @@ async function loadStore(){
                 ),
 
                 (async () => {
+
+                    const controller =
+                        typeof AbortController !== "undefined"
+                        ? new AbortController()
+                        : null;
+
+                    const timer = controller
+                        ? setTimeout(
+                            () => controller.abort(),
+                            3500
+                          )
+                        : null;
+
                     try{
 
                         const cdnRes =
                             await fetch(
                                 cdnUrl,
-                                { cache: "no-store" }
+                                controller
+                                ? { signal: controller.signal }
+                                : {}
                             );
 
                         if(!cdnRes.ok)
@@ -2459,6 +2473,8 @@ async function loadStore(){
 
                     }catch(e){
                         return null;
+                    }finally{
+                        if(timer) clearTimeout(timer);
                     }
                 })()
 
