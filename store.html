@@ -2405,7 +2405,57 @@ async function loadStore(){
             ".json?v=" +
             Math.floor(Date.now() / 1800000);
 
-        const [stores, settings, cdnResult] =
+        const cdnPromise =
+            (async () => {
+
+                const controller =
+                    typeof AbortController !== "undefined"
+                    ? new AbortController()
+                    : null;
+
+                const timer = controller
+                    ? setTimeout(
+                        () => controller.abort(),
+                        3500
+                      )
+                    : null;
+
+                try{
+
+                    const cdnRes =
+                        await fetch(
+                            cdnUrl,
+                            controller
+                            ? { signal: controller.signal }
+                            : {}
+                        );
+
+                    if(!cdnRes.ok)
+                        return null;
+
+                    const bundle =
+                        await cdnRes.json();
+
+                    if(
+                        bundle &&
+                        Array.isArray(bundle.banners) &&
+                        Array.isArray(bundle.categories) &&
+                        Array.isArray(bundle.products) &&
+                        Array.isArray(bundle.sections)
+                    )
+                        return bundle;
+
+                    return null;
+
+                }catch(e){
+                    return null;
+                }finally{
+                    if(timer) clearTimeout(timer);
+                }
+            })();
+
+
+        const [stores, settings] =
             await Promise.all([
 
                 supabaseRequest(
@@ -2428,55 +2478,7 @@ async function loadStore(){
                             encodeURIComponent(STORE_ID) +
                             "&limit=1"
                     }
-                ),
-
-                (async () => {
-
-                    const controller =
-                        typeof AbortController !== "undefined"
-                        ? new AbortController()
-                        : null;
-
-                    const timer = controller
-                        ? setTimeout(
-                            () => controller.abort(),
-                            3500
-                          )
-                        : null;
-
-                    try{
-
-                        const cdnRes =
-                            await fetch(
-                                cdnUrl,
-                                controller
-                                ? { signal: controller.signal }
-                                : {}
-                            );
-
-                        if(!cdnRes.ok)
-                            return null;
-
-                        const bundle =
-                            await cdnRes.json();
-
-                        if(
-                            bundle &&
-                            Array.isArray(bundle.banners) &&
-                            Array.isArray(bundle.categories) &&
-                            Array.isArray(bundle.products) &&
-                            Array.isArray(bundle.sections)
-                        )
-                            return bundle;
-
-                        return null;
-
-                    }catch(e){
-                        return null;
-                    }finally{
-                        if(timer) clearTimeout(timer);
-                    }
-                })()
+                )
 
             ]);
 
@@ -2609,8 +2611,8 @@ async function loadStore(){
 
 /* =================================================
    3-6 — BANNERS + CATEGORIES + PRODUCTS + SECTIONS
-   أولاً: من CDN (قراءة مجانية بلا حدود — مثل الصور)
-   فإن تعذّر CDN: احتياط مباشر من Supabase
+   المصدر الأساسي: Supabase (بيانات طازجة تظهر فورًا)
+   احتياطي: حزمة CDN — لا ننتظرها إلا إذا فشل Supabase
    ================================================= */
 
 let banners = [];
@@ -2620,9 +2622,13 @@ let sections = [];
 let sectionProducts = [];
 
 let fromCDN = false;
+let cdnResult = null;
 
 
-if(cdnResult){
+function useCDNBundle(){
+
+    if(!cdnResult)
+        return false;
 
     banners =
         cdnResult.banners;
@@ -2639,10 +2645,12 @@ if(cdnResult){
 
     fromCDN = true;
 
+    return true;
+
 }
 
 
-if(!fromCDN){
+try{
 
     [banners, categories, products, sections] =
         await Promise.all([
@@ -2681,6 +2689,15 @@ if(!fromCDN){
 
         ]);
 
+}catch(e){
+
+    /* إذا فشل Supabase ننتظر حزمة CDN كاحتياط */
+
+    cdnResult = await cdnPromise;
+
+    if(!useCDNBundle())
+        throw e;
+
 }
 
 data.banners   = banners   || [];
@@ -2700,20 +2717,31 @@ data.products  =
 const sectionIds =
     (sections || []).map(s => String(s.id));
 
-if(!fromCDN && sectionIds.length){
+if(sectionIds.length){
 
-    sectionProducts =
-        await supabaseRequest(
-            "page_section_products",
-            {
-                query:
-                    "?select=*" +
-                    "&section_id=in.(" +
-                    encodeURIComponent(sectionIds.join(",")) +
-                    ")" +
-                    "&order=position.asc"
-            }
-        );
+    try{
+
+        sectionProducts =
+            await supabaseRequest(
+                "page_section_products",
+                {
+                    query:
+                        "?select=*" +
+                        "&section_id=in.(" +
+                        encodeURIComponent(sectionIds.join(",")) +
+                        ")" +
+                        "&order=position.asc"
+                }
+            );
+
+    }catch(e){
+
+        /* احتياط: نحتفظ ببيانات CDN إن فشلت القاعدة */
+
+        if(!fromCDN)
+            throw e;
+
+    }
 
 }
 
