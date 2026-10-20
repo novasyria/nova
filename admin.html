@@ -7956,6 +7956,23 @@ async function viewOrder(id){
 
                     </span>
 
+                    ${
+                        orderOptionsText(item)
+                        ? `
+                            <span
+                                style="
+                                display:block;
+                                margin-top:4px;
+                                color:#6d4aff;
+                                font-weight:700
+                                "
+                            >
+                                ${orderOptionsText(item)}
+                            </span>
+                        `
+                        : ""
+                    }
+
                 </div>
 
 
@@ -8544,6 +8561,121 @@ async function showInvoice(id){
    BUILD INVOICE
    ========================================================= */
 
+/* =========================================================
+   نص اختيارات المنتج (المقاس / اللون ...)
+   لعرضها داخل الفاتورة وتفاصيل الطلب
+   ========================================================= */
+
+function orderOptionsText(item){
+
+    let raw =
+        item &&
+        item.options;
+
+    if(!raw)
+        return "";
+
+    if(typeof raw === "string"){
+
+        try{
+
+            raw =
+                JSON.parse(raw);
+
+        }catch(e){
+
+            return String(raw).trim();
+
+        }
+
+    }
+
+    if(
+        !raw ||
+        typeof raw !== "object"
+    )
+        return String(raw);
+
+
+    const product =
+        (data.products || [])
+        .find(
+            p =>
+            String(p.id) ===
+            String(item.product_id)
+        );
+
+    const groups =
+        (
+            product &&
+            Array.isArray(product.options)
+        )
+        ? product.options
+        : [];
+
+
+    const parts = [];
+
+
+    Object.keys(raw).forEach(
+        key =>{
+
+            const value =
+                raw[key];
+
+            if(
+                value === "" ||
+                value === null ||
+                typeof value === "undefined"
+            )
+                return;
+
+
+            let title =
+                null;
+
+
+            if(/^\d+$/.test(key)){
+
+                const group =
+                    groups[ Number(key) ];
+
+                title =
+                    (
+                        group &&
+                        group.title
+                    ) ||
+                    null;
+
+            }else{
+
+                title =
+                    key;
+
+            }
+
+            parts.push(
+                (
+                    title
+                    ? title + ": "
+                    : ""
+                ) +
+                value
+            );
+
+        }
+    );
+
+
+    if(!parts.length)
+        return "";
+
+
+    return parts.map(esc).join(" • ");
+
+}
+
+
 function buildInvoice(order){
 
     const items =
@@ -8564,6 +8696,22 @@ function buildInvoice(order){
                     ${esc(
                         item.name
                     )}
+
+                    ${
+                        orderOptionsText(item)
+                        ? `
+                            <div
+                                style="
+                                font-size:11px;
+                                color:#777;
+                                margin-top:3px
+                                "
+                            >
+                                ${orderOptionsText(item)}
+                            </div>
+                        `
+                        : ""
+                    }
                 </td>
 
                 <td>

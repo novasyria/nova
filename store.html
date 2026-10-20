@@ -5999,6 +5999,57 @@ async function confirmOrder(){
                     }
 
 
+                    /*
+                       نحفظ اسم الخيار مع قيمته
+                       مثال: المقاس: L  •  اللون: أحمر
+                    */
+
+                    const savedOptions =
+                        {};
+
+
+                    Object.keys(
+                        options
+                    ).forEach(
+                        key =>{
+
+                            let title =
+                                key;
+
+                            if(
+                                /^\d+$/.test(key)
+                            ){
+
+                                const group =
+                                    (
+                                        Array.isArray(product.options)
+                                        ? product.options
+                                        : []
+                                    )[ Number(key) ];
+
+                                title =
+                                    (
+                                        group &&
+                                        group.title
+                                    )
+                                    || (
+                                        "الخيار " +
+                                        (
+                                            Number(key) + 1
+                                        )
+                                    );
+
+                            }
+
+                            savedOptions[
+                                title
+                            ] =
+                                options[key];
+
+                        }
+                    );
+
+
                     return {
 
                         productId:
@@ -6026,7 +6077,7 @@ async function confirmOrder(){
                             ),
 
                         options:
-                            options
+                            savedOptions
 
                     };
 
